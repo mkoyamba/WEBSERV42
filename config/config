@@ -1,0 +1,90 @@
+# Here is an example of a full configuration using all the features available.
+# It's based on Nginx conf, without the features we don't need to manage.
+
+# Binary properties takes yes/no as value.
+# There can be an inifinite number of whitespaces before and between proprties name and values.
+
+# A simple server on port 80.
+server {
+	listen localhost:5555 localhost:5556
+	server_name first
+
+	error_page 202 /202.html
+	error_page 401 /401.html
+	error_page 403 /403.html
+	error_page 404 /404.html
+	error_page 405 /405.html
+	error_page 413 /413.html
+	error_page 418 /418.html
+	error_page 502 /502.html
+
+	client_max_body_size 500K
+
+	root www
+
+	cgi_extension py
+
+	autoindex on
+
+	allow_methods PUT
+
+	upload on
+
+	location / {
+		allow_methods GET
+		index /index.html
+	}
+
+	location /directory {
+		allow_methods GET
+		index /index.html
+		root www
+	}
+
+	location /cgi {
+		allow_methods GET POST
+		autoindex on
+	}
+
+	location /redir {
+		allow_methods GET POST
+		redirect http://www.google.com
+	}
+
+	location /uploads {
+		allow_methods DELETE GET
+		autoindex on
+	}
+}
+
+server {
+	listen 127.0.0.1:80
+	server_name hello
+
+	error_page 401 /401.html
+	error_page 403 /403.html
+	error_page 404 /404.html
+	error_page 405 /405.html
+	error_page 418 /418.html
+
+	client_max_body_size 500K
+	allow_methods GET POST PUT DELETE
+	root www
+	index index.html
+
+	cgi_path /oui/non
+
+	location / {
+		autoindex on
+		allow_methods GET POST
+	}
+
+	location /upload {
+		allow_methods POST
+		index /post_page.html
+	}
+	location /cgi {
+		allow_methods GET POST
+		autoindex on
+	}
+}
