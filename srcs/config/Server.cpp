@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 18:09:48 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/08 10:16:07 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/08 10:32:47 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -137,7 +137,7 @@ void	Server::handle_methods(std::string server) {
 		end = server.find('\n', begin);
 		methods = server.substr(begin, end - begin);
 	}
-	for (int i = 0; i < 4; i++)
+	for (int i = 0; i < 3; i++)
 		_methods[i] = false;
 	if (methods.find("DELETE") != std::string::npos)
 		_methods[DELETE] = true;
@@ -145,8 +145,6 @@ void	Server::handle_methods(std::string server) {
 		_methods[GET] = true;
 	if (methods.find("POST") != std::string::npos)
 		_methods[POST] = true;
-	if (methods.find("PUT") != std::string::npos)
-		_methods[PUT] = true;
 }
 
 bool	valid_host(std::string host) {

@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 17:10:06 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/07 16:52:07 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/08 10:32:50 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,5 @@
 # define DELETE	0
 # define GET	1
 # define POST	2
-# define PUT	3
 
 #endif

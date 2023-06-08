@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 17:09:10 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/08 10:23:07 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/08 10:33:25 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,8 +28,6 @@ void	print_methods(Config &config, int server) {
 		std::cout << "GET ";
 	if (config.getServer(server).getMethod(POST))
 		std::cout << "POST ";
-	if (config.getServer(server).getMethod(PUT))
-		std::cout << "PUT ";
 	std::cout << std::endl;
 }
 
@@ -44,7 +42,7 @@ void	print_extensions(Config &config, int server) {
 
 bool	check_method(std::map<std::string, Location>::iterator it) {
 	if (it->second.getMethod(DELETE) || it->second.getMethod(GET)
-		|| it->second.getMethod(POST) || it->second.getMethod(PUT))
+		|| it->second.getMethod(POST))
 		return true;
 	return false;
 }
@@ -56,8 +54,6 @@ void	print_methods_location(std::map<std::string, Location>::iterator it) {
 		std::cout << "GET ";
 	if (it->second.getMethod(POST))
 		std::cout << "POST ";
-	if (it->second.getMethod(PUT))
-		std::cout << "PUT ";
 	std::cout << std::endl;
 }
 

@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 17:42:18 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/08 10:12:02 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/08 10:32:40 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ class Server {
 		std::map<std::string, Location>				_locations;
 		std::map<int, std::string>					_error_page;
 		std::vector<std::pair<std::string, int> >	_listen;
-		bool										_methods[4];
+		bool										_methods[3];
 		std::string									_name;
 		std::string									_root;
 		std::string									_index;

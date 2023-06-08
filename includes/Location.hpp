@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 17:32:11 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/08 09:59:16 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/08 10:32:36 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ class Location {
 
 	private:
 		std::map<int, std::string>	_error_page;
-		bool						_methods[4];
+		bool						_methods[3];
 		std::string					_body_size;
 		std::string					_root;
 		std::string					_index;

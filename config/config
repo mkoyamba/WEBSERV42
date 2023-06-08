@@ -26,8 +26,6 @@ server {
 
 	autoindex on
 
-	allow_methods PUT
-
 	upload_path /oui/oui
 
 	upload on
@@ -70,7 +68,7 @@ server {
 	error_page 418 /418.html
 
 	client_max_body_size 500K
-	allow_methods GET POST PUT DELETE
+	allow_methods GET POST DELETE
 	root www
 	index index.html
 	cgi_extension py
