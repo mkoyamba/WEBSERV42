@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 17:32:11 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/07 19:37:05 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/08 09:59:16 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,10 +32,10 @@ class Location {
 		std::string		getErrorPage(int index) { return _error_page[index]; };
 		bool			getMethod(int index) { return _methods[index]; };
 	
-		void	handle_strings(std::string &server);
-		void	handle_boolean(std::string &server);
-		void	handle_errors(std::string server);
-		void	handle_methods(std::string server);
+		void			handle_strings(std::string &server);
+		void			handle_boolean(std::string &server);
+		void			handle_errors(std::string server);
+		void			handle_methods(std::string server);
 
 	private:
 		std::map<int, std::string>	_error_page;

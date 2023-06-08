@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 17:42:18 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/07 19:40:43 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/08 10:12:02 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,13 +35,16 @@ class Server {
 		bool										getMethod(int index) { return _methods[index]; };
 		std::vector<std::pair<std::string, int> >	getListen(void) { return _listen; }
 		std::map<std::string, Location>				getLocations(void) { return _locations; };
+		std::vector<std::string>					getExtensions(void) { return _cgi_ext; };
 
-		void	handle_locations(std::string &server);
-		void	handle_strings(std::string &server);
-		void	handle_boolean(std::string &server);
-		void	handle_errors(std::string server);
-		void	handle_methods(std::string server);
-		void	handle_listen(std::string server);
+		void										handle_locations(std::string &server);
+		void										handle_strings(std::string &server);
+		void										handle_boolean(std::string &server);
+		void										handle_errors(std::string server);
+		void										handle_methods(std::string server);
+		void										handle_listen(std::string server);
+		void										handle_extensions(std::string server);
+
 
 
 	private:
@@ -58,7 +61,7 @@ class Server {
 		std::string									_body_size;
 		bool										_autoindex;
 		bool										_upload;
-		std::vector<std::string>					_cgiExt;
+		std::vector<std::string>					_cgi_ext;
 };
 
 #endif

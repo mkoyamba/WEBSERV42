@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 18:09:48 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/07 20:05:02 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/08 10:16:07 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@ Server::Server(std::string server) {
 	handle_errors(server);
 	handle_methods(server);
 	handle_listen(server);
+	handle_extensions(server);
 }
 
 void	Server::handle_locations(std::string &server) {
@@ -209,4 +210,24 @@ void	Server::handle_listen(std::string server) {
 			end++;
 		current.erase(0, end);
 	}
+}
+
+void	Server::handle_extensions(std::string server) {
+	size_t						begin;
+	size_t						end;
+	std::string					current;
+
+	begin = server.find("cgi_extension") + 14;
+	if (begin == std::string::npos + 14)
+		return ;
+	end = server.find('\n', begin);
+	current = server.substr(begin, end - begin);
+	begin = 0;
+	end = current.find(' ', begin);
+	while (end != std::string::npos) {
+		_cgi_ext.push_back(current.substr(begin, end - begin));
+		begin = end + 1;
+		end = current.find(' ', begin);
+	}
+	_cgi_ext.push_back(current.substr(begin, end - begin));
 }

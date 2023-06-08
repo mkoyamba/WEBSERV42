@@ -22,11 +22,13 @@ server {
 
 	root www
 
-	cgi_extension py
+	cgi_extension py cpp js
 
 	autoindex on
 
 	allow_methods PUT
+
+	upload_path /oui/oui
 
 	upload on
 
@@ -71,12 +73,15 @@ server {
 	allow_methods GET POST PUT DELETE
 	root www
 	index index.html
+	cgi_extension py
 
 	cgi_path /oui/non
 
 	location / {
 		autoindex on
 		allow_methods GET POST
+		error_page 401 /12.html
+		error_page 403 /13.html
 	}
 
 	location /upload {
