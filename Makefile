@@ -6,7 +6,7 @@
 #    By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/06/06 17:04:20 by mkoyamba          #+#    #+#              #
-#    Updated: 2023/06/07 15:10:37 by mkoyamba         ###   ########.fr        #
+#    Updated: 2023/06/08 11:45:39 by mkoyamba         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -20,10 +20,17 @@ INCLUDE = -I includes
 #          ----------========== {     SRCS     } ==========----------
 
 SRC_DIR = srcs
+
+#MAIN
 SRC =	main.cpp\
-		Location.cpp\
+
+#PARSING
+SRC +=	Location.cpp\
 		Server.cpp\
 		Config.cpp\
+
+#EXEC
+SRC +=	exec.cpp\
 
 #          ----------========== {     OBJS     } ==========----------
 
