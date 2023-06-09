@@ -6,52 +6,99 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/08 11:43:05 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/08 15:34:04 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/09 17:00:02 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/webserv.hpp"
 
-int	exec_loop(Server server, std::pair<std::string, int> listen_pair) {
+int	server_socket(std::pair<std::string, int> listen_pair, sockaddr_in &sockaddr) {
 	int sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd == -1) {
 		std::cout << "Failed to create socket. errno: " << errno << std::endl;
 		return 1;
 	}
-	sockaddr_in sockaddr;
 	sockaddr.sin_family = AF_INET;
 	sockaddr.sin_addr.s_addr = INADDR_ANY;
 	sockaddr.sin_port = htons(listen_pair.second);
 
 	if (bind(sockfd, (struct sockaddr*)&sockaddr, sizeof(sockaddr)) < 0) {
 		std::cout << "Failed to bind to port " << listen_pair.second << std::endl;
-		return 1;
+		return -1;
 	}
 	if (listen(sockfd, 1) < 0) {
 		std::cout << "Failed to listen on socket." << std::endl;
-		return 1;
+		return -1;
 	}
+	return sockfd;
+}
 
-	int addrlen = sizeof(sockaddr);
-	int connection = accept(sockfd, (struct sockaddr*)&sockaddr, (socklen_t*)&addrlen);
-	if (connection < 0) {
-		std::cout << "Failed to grab connection." << std::endl;
-		return 1;
-	}
+std::string	daytime(void) {
+	time_t		rawtime;
+	struct tm	*timeinfo;
+	char		buffer[80];
 
-	char buffer[2048];
-	while (1) {
-		int i = read(connection, buffer, 2047);
+	time(&rawtime);
+	timeinfo = localtime(&rawtime);
+	strftime(buffer, 80, "%a %b %d %H:%M:%S %Y", timeinfo);
+	std::string	time(buffer);
+	return time;
+}
+
+void	send_file(std::string file, int client_socket, Server server) {
+	std::string response = "HTTP/1.1 200 OK\r\n";
+	response += "Date: " + daytime() + "\r\n";
+	response += "Server: " + server.getName() + "\r\n";
+	response += "Content-Type: text/html\r\n";
+
+	std::ifstream content_stream(file.c_str());
+	std::stringstream stream;
+	stream << content_stream.rdbuf();
+	std::string	content(stream.str());
+
+	response += "Content-Length: " + std::to_string(content.size()) + "\r\n\n";
+	response += content + "\r\n";
+	size_t	size = response.size();
+	while (size > 0)
+		size -= send(client_socket, response.c_str(), response.size(), 0);
+}
+
+int	client_socket(int server_sock, sockaddr_in &sockaddr, Server server) {
+	struct pollfd fds[2];
+	memset(fds, 0, sizeof(fds));
+	int timeout = 15000;
+	fds[0].fd = server_sock;
+	int addr_len = sizeof(sockaddr);
+	int client_socket = accept(server_sock, (struct sockaddr *)&sockaddr, (socklen_t*)&addr_len);
+	int flags = fcntl(server_sock, F_GETFL, 0);
+	flags |= O_NONBLOCK;
+	fcntl(server_sock, F_SETFL, flags);
+	char buffer[1024];
+	fds[0].events = POLLIN;
+	fds[1].fd = client_socket;
+	fds[1].events = POLLIN;
+	if(poll(fds, 2, timeout) > 0) {
+		int i = read(fds[1].fd, buffer, 1023);
+		if (i == -1)
+			return 1;
 		buffer[i] = '\0';
 		std::string request(buffer);
-		if (!request.compare("exit\r\n"))
-			break ;
-		std::cout << "The message was: " << request << " from port " << listen_pair.second << std::endl;
-		std::string response = "Answer from server " + server.getName() + '\n';
-		send(connection, response.c_str(), response.size(), 0);
+		std::cout << request << std::endl;
+		if (request.substr(0, 4).compare("GET")) {
+			send_file("index.html", client_socket, server);
+		}
 	}
-	close(connection);
-	close(sockfd);
+	close(client_socket);
+	return 0;
+}
+
+int	exec_loop(Server server, std::pair<std::string, int> listen_pair) {
+	(void)server;
+	sockaddr_in sockaddr;
+	int	server_sock = server_socket(listen_pair, sockaddr);
+	std::cerr << listen_pair.second << std::endl;
+	while (true)
+		client_socket(server_sock, sockaddr, server);
 	return 0;
 }
 

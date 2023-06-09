@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bade-lee <bade-lee@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 17:09:10 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/09 10:39:46 by bade-lee         ###   ########.fr       */
+/*   Updated: 2023/06/09 10:46:22 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,5 +152,4 @@ int	main(int argc, char **argv) {
 		return check;
 //	print_test(config);
 	return split_servers(config);
-	return 1;
 }

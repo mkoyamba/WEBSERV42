@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 17:10:06 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/08 14:44:10 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/09 11:30:20 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,8 @@
 # include <sys/socket.h>
 # include <netinet/in.h>
 # include <unistd.h>
+# include <poll.h>
+# include <fcntl.h>
 
 # include "Location.hpp"
 # include "Server.hpp"
