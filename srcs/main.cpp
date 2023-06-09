@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
+/*   By: bade-lee <bade-lee@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 17:09:10 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/08 14:40:39 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/09 10:39:46 by bade-lee         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -147,6 +147,10 @@ int	main(int argc, char **argv) {
 	}
 	std::string filename(argv[1]);
 	Config config(filename);
+	int check = config.check_content();
+	if (check)
+		return check;
 //	print_test(config);
 	return split_servers(config);
+	return 1;
 }

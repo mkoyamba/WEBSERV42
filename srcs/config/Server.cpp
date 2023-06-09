@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
+/*   By: bade-lee <bade-lee@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 18:09:48 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/08 10:32:47 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/09 10:40:45 by bade-lee         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -228,4 +228,16 @@ void	Server::handle_extensions(std::string server) {
 		end = current.find(' ', begin);
 	}
 	_cgi_ext.push_back(current.substr(begin, end - begin));
+}
+
+int	Server::check_content(void) {
+	if (_listen.size() < 1){
+		std::cerr << "Error: the server must have at least 1 host:port" << std::endl;
+		return 40;
+	}
+	if (!_name.compare("")){
+		std::cerr << "Error: the server must have a name" << std::endl;
+		return 41;	
+	}
+	return 0;
 }

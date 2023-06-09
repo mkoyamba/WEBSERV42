@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
+/*   By: bade-lee <bade-lee@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 18:09:28 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/07 15:46:08 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/09 10:39:56 by bade-lee         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,4 +72,13 @@ Config::Config(std::string filename) {
 		Server server(servers_str[i]);
 		_servers.push_back(server);
 	}
+}
+
+int	Config::check_content(void) {
+	for (size_t i = 0; i < _servers.size(); i++) {
+		int check = _servers[i].check_content();
+		if (check)
+			return check;
+	}
+	return 0;
 }

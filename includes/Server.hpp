@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
+/*   By: bade-lee <bade-lee@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 17:42:18 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/08 10:32:40 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/09 10:26:32 by bade-lee         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,8 @@ class Server {
 		void										handle_methods(std::string server);
 		void										handle_listen(std::string server);
 		void										handle_extensions(std::string server);
+
+		int											check_content(void);
 
 
 
