@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+         #
+#    By: bade-lee <bade-lee@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/06/06 17:04:20 by mkoyamba          #+#    #+#              #
-#    Updated: 2023/06/08 11:45:39 by mkoyamba         ###   ########.fr        #
+#    Updated: 2023/06/09 17:29:17 by bade-lee         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -31,6 +31,8 @@ SRC +=	Location.cpp\
 
 #EXEC
 SRC +=	exec.cpp\
+		Request.cpp\
+		
 
 #          ----------========== {     OBJS     } ==========----------
 

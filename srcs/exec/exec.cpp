@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
+/*   By: bade-lee <bade-lee@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/08 11:43:05 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/09 17:00:02 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/09 18:16:08 by bade-lee         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,9 +82,10 @@ int	client_socket(int server_sock, sockaddr_in &sockaddr, Server server) {
 		if (i == -1)
 			return 1;
 		buffer[i] = '\0';
-		std::string request(buffer);
-		std::cout << request << std::endl;
-		if (request.substr(0, 4).compare("GET")) {
+		std::string request_str(buffer);
+		std::cout << request_str << std::endl;
+		if (request_str.substr(0, 4).compare("GET")) {
+			Request request(request_str, server);
 			send_file("index.html", client_socket, server);
 		}
 	}
