@@ -7,7 +7,7 @@
 # A simple server on port 80.
 server {
 	listen 127.0.0.1:80
-	server_name first
+	server_name Principal
 
 	error_page 403 /403.html
 	error_page 404 /404.html
@@ -36,9 +36,18 @@ server {
 		allow_methods GET
 	}
 
-	location /redirection {
-		allow_methods GET POST
-		redirect https://42.fr/
+	location /errors {
+		index /errors.html
+		allow_methods GET
 	}
 
+	location /method {
+		index /errors.html
+		allow_methods POST
+	}
+
+	location /redirection {
+		allow_methods GET POST
+		redirect https://42.fr/;
+	}
 }

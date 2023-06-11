@@ -1,12 +1,14 @@
 <html>
 
 <title>MASTERMIND</title>
-<h1 style="color:whitesmoke;">Upload age</h1>
+<h1 style="color:whitesmoke;">Upload page</h1>
 
-<h3 style="color:whitesmoke;"> Test </h3>
-<h3 style="color:whitesmoke;"> Test </h3>
-<h3 style="color:whitesmoke;"> Test </h3>
-<h3 style="color:whitesmoke;"> Test </h3>
+<h3 style="color:whitesmoke;">Upload a file on the server here :</h3>
+
+<form action="cgi/upload.py" method="post" enctype="multipart/form-data">
+	<input type="file" name="file">
+	<input type="submit" value="Upload">
+</form>
 <br>
 <br>
 <br>
