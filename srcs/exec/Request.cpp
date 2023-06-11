@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bade-lee <bade-lee@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/09 17:27:59 by bade-lee          #+#    #+#             */
-/*   Updated: 2023/06/09 18:27:07 by bade-lee         ###   ########.fr       */
+/*   Updated: 2023/06/11 14:44:30 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,35 @@ void	Request::handle_path(std::string request_message, Server server) {
 	}
 	if (!check_path(_path, server))
 		_path = "NULL";
+	if (request_message.find(".jpg") != std::string::npos
+		|| request_message.find(".jpeg") != std::string::npos
+		|| request_message.find(".ico") != std::string::npos
+		|| request_message.find(".gif") != std::string::npos
+		|| request_message.find(".png") != std::string::npos
+		|| request_message.find(".txt") != std::string::npos) {
+		begin = request_message.find("/");
+		end = request_message.find(' ', begin);
+		_path = request_message.substr(begin, end - begin);
+		_file = true;
+		begin = request_message.find('.');
+		end = request_message.find(' ', begin);
+		_extension = request_message.substr(begin, end - begin);
+	}
+	else
+		_file = false;
+	std::cerr << "DEBUG " + _extension << std::endl;
+	if (!_extension.compare(".jpg"))
+		_extension = "image/jpeg";
+	if (!_extension.compare(".jpeg"))
+		_extension = "image/jpeg";
+	if (!_extension.compare(".ico"))
+		_extension = "image/x-icon";
+	if (!_extension.compare(".gif"))
+		_extension = "image/gif";
+	if (!_extension.compare(".png"))
+		_extension = "image/png";
+	if (!_extension.compare(".txt"))
+		_extension = "text/plain";
 }
 
 bool	Request::check_path(std::string path, Server server) {

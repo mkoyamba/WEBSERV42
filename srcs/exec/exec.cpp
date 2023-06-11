@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/08 11:43:05 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/10 20:22:51 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/11 15:50:54 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,19 +45,49 @@ std::string	daytime(void) {
 	return time;
 }
 
-void	send_file_html(std::string file, int client_socket, Server server) {
-	std::string response = "HTTP/1.1 200 OK\r\n";
+void	send_image(char *str, int client_socket) {
+	FILE	*picture;
+	picture = fopen(str, "r");
+	fseek(picture, 0, SEEK_END);
+	int size = ftell(picture);
+	std::string	size_str = "Content-Length: " + std::to_string(size) + "\r\n\n";
+	std::cerr << size_str + "==============================\n" << std::endl;
+	send(client_socket, size_str.c_str(), size_str.size(), 0);
+	fclose(picture);
+	int fd = open(str, O_RDONLY);
+	char	buffer[100];
+	size_t	ret = read(fd, buffer, 100);
+	while (ret > 0) {
+		send(client_socket, buffer, ret, 0);
+		ret = read(fd, buffer, 100);
+	}
+	close(fd);
+}
+
+void	send_file(std::string file, int client_socket, Server server, std::string code, std::string type) {
+	std::string response = "HTTP/1.1 " + code + "\r\n";
 	response += "Date: " + daytime() + "\r\n";
 	response += "Server: " + server.getName() + "\r\n";
-	response += "Content-Type: text/html\r\n";
-
-	std::ifstream content_stream(file.c_str());
-	std::stringstream stream;
-	stream << content_stream.rdbuf();
-	std::string	content(stream.str());
-
+	response += "Content-Type: "+ type + "\r\n";
+	std::string	content;
+	if (!code.compare("202 OK")) {
+		std::cerr << "==============================\nRESPONSE : " + response;
+		send(client_socket, response.c_str(), response.size(), 0);
+		file = "assets" + file;
+		send_image((char *)file.c_str(), client_socket);
+		return ;
+	}
+	else if (file.compare("")) {
+		std::ifstream content_stream(file.c_str());
+		std::stringstream stream;
+		stream << content_stream.rdbuf();
+		content = stream.str();
+	}
+	else
+		content = "<h1>ERROR 404 - Page not found</h1>";
 	response += "Content-Length: " + std::to_string(content.size()) + "\r\n\n";
 	response += content + "\r\n";
+	std::cerr << "==============================\nRESPONSE : " + response + file + "==============================\n" << std::endl;
 	size_t	size = response.size();
 	while (size > 0)
 		size -= send(client_socket, response.c_str(), response.size(), 0);
@@ -66,21 +96,33 @@ void	send_file_html(std::string file, int client_socket, Server server) {
 void	handle_request(Request request, int client_sock, Server server) {
 	
 	if (!request.getPath().compare("NULL") && !request.getMethod().compare("GET")) {
-		send_file_html("www/404.html", client_sock, server);
+		send_file(server.getErrorPage(404), client_sock, server, "404 Not Found", "text/html");
 		return ;
 	}
-	Location	location = server.getLocations()[request.getPath()];
-	if (!request.getMethod().compare("GET")) {
+	if (request.getFile() && !request.getMethod().compare("GET")) {
+		send_file(request.getPath(), client_sock, server, "202 OK", request.getExtension());
+		return ;
+	}
+	else if (!request.getMethod().compare("GET")) {
+		Location	location = server.getLocations()[request.getPath()];
 		std::string	index;
 		if (location.getRoot().compare(""))
 			index += location.getRoot();
 		else
 			index += server.getRoot();
+		if (!location.getMethod(GET) && !server.getMethod(GET)) {
+			if (location.getErrorPage(403).compare(""))
+				index += location.getErrorPage(403);
+			else
+				index += server.getErrorPage(403);
+			send_file(index, client_sock, server, "403 Forbidden", "text/html");
+			return ;
+		}
 		if (location.getIndex().compare(""))
 			index += location.getIndex();
 		else
 			index += server.getIndex();
-		send_file_html(index, client_sock, server);
+		send_file(index, client_sock, server, "200 OK", "text/html");
 	}
 }
 
