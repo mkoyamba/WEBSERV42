@@ -6,7 +6,7 @@
 
 # A simple server on port 80.
 server {
-	listen localhost:5555 localhost:5556
+	listen 127.0.0.1:80
 	server_name first
 
 	error_page 202 /202.html
@@ -18,74 +18,31 @@ server {
 	error_page 418 /418.html
 	error_page 502 /502.html
 
-	client_max_body_size 500K
-
 	root www
 
-	cgi_extension py
-
-	autoindex on
-
-	upload_path /oui/oui
-
-	upload on
-
 	location / {
+		index /homepage.html
 		allow_methods GET
-		index /index.html
 	}
 
-	location /directory {
+	location /download {
+		index /download.html
 		allow_methods GET
-		index /index.html
-	}
-
-	location /cgi {
-		allow_methods GET POST
-		autoindex on
-	}
-
-	location /redir {
-		allow_methods GET POST
-		redirect http://www.google.com
-	}
-
-	location /uploads {
-		allow_methods DELETE GET
-		autoindex on
-	}
-}
-
-server {
-	listen 127.0.0.1:80
-	server_name hello
-
-	error_page 401 /401.html
-	error_page 403 /403.html
-	error_page 404 /404.html
-	error_page 405 /405.html
-	error_page 418 /418.html
-
-	client_max_body_size 500K
-	root www
-	index /index.html
-	cgi_extension py
-
-	cgi_path /oui/non
-
-	location / {
-		autoindex on
-		allow_methods GET POST
-		error_page 401 /12.html
-		error_page 403 /13.html
 	}
 
 	location /upload {
+		index /upload.html
 		allow_methods GET POST
-		index /post_page.html
 	}
-	location /cgi {
-		allow_methods POST
-		autoindex on
+
+	location /credits {
+		index /credits.html
+		allow_methods GET
 	}
+
+	location /redirection {
+		allow_methods GET POST
+		redirect https://42.fr/
+	}
+
 }
