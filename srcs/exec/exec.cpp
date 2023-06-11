@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/08 11:43:05 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/11 16:12:45 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/11 16:40:59 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -155,7 +155,6 @@ int	client_socket(int server_sock, sockaddr_in &sockaddr, Server server) {
 }
 
 int	exec_loop(Server server, std::pair<std::string, int> listen_pair) {
-	(void)server;
 	sockaddr_in sockaddr;
 	int	server_sock = server_socket(listen_pair, sockaddr);
 	std::cerr << listen_pair.second << std::endl;
