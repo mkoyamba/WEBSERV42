@@ -38,7 +38,6 @@ server {
 	location /directory {
 		allow_methods GET
 		index /index.html
-		root www
 	}
 
 	location /cgi {
@@ -70,7 +69,7 @@ server {
 	client_max_body_size 500K
 	allow_methods GET POST DELETE
 	root www
-	index index.html
+	index /index.html
 	cgi_extension py
 
 	cgi_path /oui/non

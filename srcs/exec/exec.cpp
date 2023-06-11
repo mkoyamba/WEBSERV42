@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bade-lee <bade-lee@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/08 11:43:05 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/09 18:16:08 by bade-lee         ###   ########.fr       */
+/*   Updated: 2023/06/10 20:22:51 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ std::string	daytime(void) {
 	return time;
 }
 
-void	send_file(std::string file, int client_socket, Server server) {
+void	send_file_html(std::string file, int client_socket, Server server) {
 	std::string response = "HTTP/1.1 200 OK\r\n";
 	response += "Date: " + daytime() + "\r\n";
 	response += "Server: " + server.getName() + "\r\n";
@@ -63,19 +63,40 @@ void	send_file(std::string file, int client_socket, Server server) {
 		size -= send(client_socket, response.c_str(), response.size(), 0);
 }
 
+void	handle_request(Request request, int client_sock, Server server) {
+	
+	if (!request.getPath().compare("NULL") && !request.getMethod().compare("GET")) {
+		send_file_html("www/404.html", client_sock, server);
+		return ;
+	}
+	Location	location = server.getLocations()[request.getPath()];
+	if (!request.getMethod().compare("GET")) {
+		std::string	index;
+		if (location.getRoot().compare(""))
+			index += location.getRoot();
+		else
+			index += server.getRoot();
+		if (location.getIndex().compare(""))
+			index += location.getIndex();
+		else
+			index += server.getIndex();
+		send_file_html(index, client_sock, server);
+	}
+}
+
 int	client_socket(int server_sock, sockaddr_in &sockaddr, Server server) {
 	struct pollfd fds[2];
 	memset(fds, 0, sizeof(fds));
 	int timeout = 15000;
 	fds[0].fd = server_sock;
 	int addr_len = sizeof(sockaddr);
-	int client_socket = accept(server_sock, (struct sockaddr *)&sockaddr, (socklen_t*)&addr_len);
+	int client_sock = accept(server_sock, (struct sockaddr *)&sockaddr, (socklen_t*)&addr_len);
 	int flags = fcntl(server_sock, F_GETFL, 0);
 	flags |= O_NONBLOCK;
 	fcntl(server_sock, F_SETFL, flags);
 	char buffer[1024];
 	fds[0].events = POLLIN;
-	fds[1].fd = client_socket;
+	fds[1].fd = client_sock;
 	fds[1].events = POLLIN;
 	if(poll(fds, 2, timeout) > 0) {
 		int i = read(fds[1].fd, buffer, 1023);
@@ -84,12 +105,10 @@ int	client_socket(int server_sock, sockaddr_in &sockaddr, Server server) {
 		buffer[i] = '\0';
 		std::string request_str(buffer);
 		std::cout << request_str << std::endl;
-		if (request_str.substr(0, 4).compare("GET")) {
-			Request request(request_str, server);
-			send_file("index.html", client_socket, server);
-		}
+		Request request(request_str, server);
+		handle_request(request, client_sock, server);
 	}
-	close(client_socket);
+	close(client_sock);
 	return 0;
 }
 
