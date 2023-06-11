@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/08 11:43:05 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/11 15:50:54 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/11 16:12:45 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,7 +68,7 @@ void	send_file(std::string file, int client_socket, Server server, std::string c
 	std::string response = "HTTP/1.1 " + code + "\r\n";
 	response += "Date: " + daytime() + "\r\n";
 	response += "Server: " + server.getName() + "\r\n";
-	response += "Content-Type: "+ type + "\r\n";
+	response += "Content-Type: " + type + "\r\n";
 	std::string	content;
 	if (!code.compare("202 OK")) {
 		std::cerr << "==============================\nRESPONSE : " + response;
@@ -96,7 +96,7 @@ void	send_file(std::string file, int client_socket, Server server, std::string c
 void	handle_request(Request request, int client_sock, Server server) {
 	
 	if (!request.getPath().compare("NULL") && !request.getMethod().compare("GET")) {
-		send_file(server.getErrorPage(404), client_sock, server, "404 Not Found", "text/html");
+		send_file(server.getRoot() + server.getErrorPage(404), client_sock, server, "404 Not Found", "text/html");
 		return ;
 	}
 	if (request.getFile() && !request.getMethod().compare("GET")) {
@@ -112,10 +112,10 @@ void	handle_request(Request request, int client_sock, Server server) {
 			index += server.getRoot();
 		if (!location.getMethod(GET) && !server.getMethod(GET)) {
 			if (location.getErrorPage(403).compare(""))
-				index += location.getErrorPage(403);
+				index += location.getErrorPage(405);
 			else
-				index += server.getErrorPage(403);
-			send_file(index, client_sock, server, "403 Forbidden", "text/html");
+				index += server.getErrorPage(405);
+			send_file(index, client_sock, server, "405 Method Not Allowed", "text/html");
 			return ;
 		}
 		if (location.getIndex().compare(""))

@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/09 17:27:59 by bade-lee          #+#    #+#             */
-/*   Updated: 2023/06/11 14:44:30 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/11 16:04:09 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,6 @@ void	Request::handle_path(std::string request_message, Server server) {
 	}
 	else
 		_file = false;
-	std::cerr << "DEBUG " + _extension << std::endl;
 	if (!_extension.compare(".jpg"))
 		_extension = "image/jpeg";
 	if (!_extension.compare(".jpeg"))
