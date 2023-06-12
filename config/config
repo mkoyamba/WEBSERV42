@@ -6,7 +6,7 @@
 
 # A simple server on port 80.
 server {
-	listen localhost:80
+	listen 127.0.0.1:80
 	server_name Principal
 
 	error_page 403 /403.html
@@ -46,6 +46,11 @@ server {
 		allow_methods POST
 	}
 
+	location /cgi {
+		index /credits.html
+		allow_methods GET POST;
+	}
+
 	location /redirection {
 		allow_methods GET POST
 		redirect https://42.fr/;
@@ -53,8 +58,8 @@ server {
 }
 
 server {
-	listen localhost:5555
-	server_name Secondaire
+	listen 127.0.0.1:5555
+	server_name Secondary
 
 	error_page 403 /403.html
 	error_page 404 /404.html
@@ -91,6 +96,11 @@ server {
 	location /method {
 		index /errors.html
 		allow_methods POST
+	}
+
+	location /cgi {
+		index /credits.html
+		allow_methods GET POST;
 	}
 
 	location /redirection {

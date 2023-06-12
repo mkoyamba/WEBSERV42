@@ -4,12 +4,12 @@
 <h1 style="color:whitesmoke;">Upload page</h1>
 
 <h3 style="color:whitesmoke;">Upload a file on the server here :</h3>
-
-<form action="cgi/upload.py" method="post" enctype="multipart/form-data">
-	<input type="file" name="file">
-	<input type="submit" value="Upload">
-</form>
 <br>
+<form action="upload.php" method="post" enctype="multipart/form-data">
+	<label for="file"></label>
+	<input id="file" name="file" type="file" />
+	<button>Upload</button>
+</form>
 <br>
 <br>
 <h3 style="color:whitesmoke;" >Come back to <a href=".." style="color:red;"> Homepage </a></h3>
