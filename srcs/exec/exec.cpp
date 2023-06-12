@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/08 11:43:05 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/12 16:50:52 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/12 17:11:42 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -175,18 +175,12 @@ int	split_servers(Config config) {
 			for (int i = 0; i < nev; i++) {
 				int addr_len = sizeof(pairs[evlist[i].ident].first);
 				int client_sock = accept(evlist[i].ident, (struct sockaddr *)&pairs[evlist[i].ident].first, (socklen_t*)&addr_len);
-				char buffer[1024];
-				int j = read(client_sock, buffer, 1023);
-				std::string request_str;
+				char buffer[4097];
+				int j = read(client_sock, buffer, 4096);
 				if (j == -1)
 					return 1;
-				while (j > 0) {
-					buffer[j] = '\0';
-					request_str += buffer;
-					j = read(client_sock, buffer, 1023);
-				}
-				if (j == -1)
-					return 1;
+				buffer[j] = '\0';
+				std::string request_str(buffer);
 				std::cout << request_str << std::endl;
 				Request request(request_str, pairs[evlist[i].ident].second);
 				handle_request(request, client_sock, pairs[evlist[i].ident].second);
