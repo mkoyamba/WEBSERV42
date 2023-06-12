@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/08 11:43:05 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/12 17:11:42 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/12 17:34:23 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,10 @@ std::string	daytime(void) {
 void	send_image(char *str, int client_socket) {
 	FILE	*picture;
 	picture = fopen(str, "r");
+	if (!picture) {
+		send_image((char *)"assets/default.png", client_socket);
+		return ;
+	}
 	fseek(picture, 0, SEEK_END);
 	int size = ftell(picture);
 	std::string	size_str = "Content-Length: " + std::to_string(size) + "\r\n\n";
