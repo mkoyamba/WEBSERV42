@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 17:09:10 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/09 10:46:22 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/12 16:14:06 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -150,6 +150,6 @@ int	main(int argc, char **argv) {
 	int check = config.check_content();
 	if (check)
 		return check;
-//	print_test(config);
+	//print_test(config);
 	return split_servers(config);
 }

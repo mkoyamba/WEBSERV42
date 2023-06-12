@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bade-lee <bade-lee@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 17:10:06 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/09 18:12:35 by bade-lee         ###   ########.fr       */
+/*   Updated: 2023/06/12 14:26:04 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@
 # include <sys/socket.h>
 # include <netinet/in.h>
 # include <unistd.h>
-# include <poll.h>
+# include <sys/event.h>
 # include <fcntl.h>
 
 # include "Location.hpp"

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bade-lee <bade-lee@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 17:42:18 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/09 10:26:32 by bade-lee         ###   ########.fr       */
+/*   Updated: 2023/06/12 16:25:46 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@ class Location;
 
 class Server {
 	public:
+		Server() {};
 		Server(std::string server);
 		~Server() {};
 
@@ -32,6 +33,7 @@ class Server {
 		bool										getAutoIndex(void) { return _autoindex; };
 		bool										getUpload(void) { return _upload; };
 		std::string									getErrorPage(int index) { return _error_page[index]; };
+		std::map<int, std::string>					getErrorPages(void) { return _error_page; };
 		bool										getMethod(int index) { return _methods[index]; };
 		std::vector<std::pair<std::string, int> >	getListen(void) { return _listen; }
 		std::map<std::string, Location>				getLocations(void) { return _locations; };

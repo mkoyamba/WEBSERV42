@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/08 11:43:05 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/11 16:40:59 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/12 16:50:52 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ int	server_socket(std::pair<std::string, int> listen_pair, sockaddr_in &sockaddr
 		std::cout << "Failed to listen on socket." << std::endl;
 		return -1;
 	}
+	std::cout << "Listening to port " << listen_pair.second << std::endl;
 	return sockfd;
 }
 
@@ -126,75 +127,71 @@ void	handle_request(Request request, int client_sock, Server server) {
 	}
 }
 
-int	client_socket(int server_sock, sockaddr_in &sockaddr, Server server) {
-	struct pollfd fds[2];
-	memset(fds, 0, sizeof(fds));
-	int timeout = 15000;
-	fds[0].fd = server_sock;
-	int addr_len = sizeof(sockaddr);
-	int client_sock = accept(server_sock, (struct sockaddr *)&sockaddr, (socklen_t*)&addr_len);
-	int flags = fcntl(server_sock, F_GETFL, 0);
-	flags |= O_NONBLOCK;
-	fcntl(server_sock, F_SETFL, flags);
-	char buffer[1024];
-	fds[0].events = POLLIN;
-	fds[1].fd = client_sock;
-	fds[1].events = POLLIN;
-	if(poll(fds, 2, timeout) > 0) {
-		int i = read(fds[1].fd, buffer, 1023);
-		if (i == -1)
-			return 1;
-		buffer[i] = '\0';
-		std::string request_str(buffer);
-		std::cout << request_str << std::endl;
-		Request request(request_str, server);
-		handle_request(request, client_sock, server);
-	}
-	close(client_sock);
+int	exec_port(int socket, int kq) {
+	struct kevent result;
+
+	EV_SET(&result, socket, EVFILT_READ, EV_ADD, 0, 0, 0);
+	if (kevent(kq, &result, 1, nullptr, 0, nullptr) == -1)
+		throw std::runtime_error("Error adding event to kqueue");
 	return 0;
 }
 
-int	exec_loop(Server server, std::pair<std::string, int> listen_pair) {
-	sockaddr_in sockaddr;
-	int	server_sock = server_socket(listen_pair, sockaddr);
-	std::cerr << listen_pair.second << std::endl;
-	while (true)
-		client_socket(server_sock, sockaddr, server);
-	return 0;
-}
-
-int	split_ports(Server server) {
-	size_t	size = server.getListen().size();
-	std::vector<pid_t> pids;
-
-	for (size_t i = 0; i < size; i++) {
-		pid_t	pid = fork();
-		if (pid < 0)
-			return 1;
-		else if (pid == 0)
-			return exec_loop(server, server.getListen()[i]);
-		else
-			pids.push_back(pid);
-	}
-	for (size_t i = 0; i < pids.size(); i++)
-		waitpid(pids[i], NULL, 0);
-	return 0;
+int	exec_server_sock(std::pair<std::string, int> listens, std::map<int, std::pair<sockaddr_in, Server> > &pairs, Server server) {
+	std::pair<sockaddr_in, Server>	socket_ad;
+	socket_ad.second = server;
+	int s = server_socket(listens, socket_ad.first);
+	if (s == -1)
+		return s;
+	pairs[s] = socket_ad;
+	return s;
 }
 
 int	split_servers(Config config) {
+	
 	size_t	size = config.size();
-	std::vector<pid_t> pids;
+	std::map<int, std::pair<sockaddr_in, Server> >	pairs;
+	std::vector<struct kevent>							events;
+	int											kq;
 
+	kq = kqueue();
+	if (kq == -1)
+		return 1;
 	for (size_t i = 0; i < size; i++) {
-		pid_t	pid = fork();
-		if (pid < 0)
-			return 1;
-		else if (pid == 0)
-			return split_ports(config.getServer(i));
-		else
-			pids.push_back(pid);
+		std::vector<std::pair<std::string, int> >	listens;
+		listens = config.getServer(i).getListen();
+		for (size_t j = 0; j < listens.size(); j++) {
+			int socket = exec_server_sock(listens[j], pairs, config.getServer(i));
+			if (socket == -1)
+				return 1;
+			exec_port(socket, kq);
+		}
 	}
-	for (size_t i = 0; i < pids.size(); i++)
-		waitpid(pids[i], NULL, 0);
+	while (true) {
+		struct kevent	evlist[1024];
+		int	nev = kevent(kq, NULL, 0, evlist, 1024, NULL);
+		if (nev == -1)
+			throw std::runtime_error("Error waiting for events");
+		else if (nev > 0) {
+			for (int i = 0; i < nev; i++) {
+				int addr_len = sizeof(pairs[evlist[i].ident].first);
+				int client_sock = accept(evlist[i].ident, (struct sockaddr *)&pairs[evlist[i].ident].first, (socklen_t*)&addr_len);
+				char buffer[1024];
+				int j = read(client_sock, buffer, 1023);
+				std::string request_str;
+				if (j == -1)
+					return 1;
+				while (j > 0) {
+					buffer[j] = '\0';
+					request_str += buffer;
+					j = read(client_sock, buffer, 1023);
+				}
+				if (j == -1)
+					return 1;
+				std::cout << request_str << std::endl;
+				Request request(request_str, pairs[evlist[i].ident].second);
+				handle_request(request, client_sock, pairs[evlist[i].ident].second);
+			}	
+		}
+	}
 	return 0;
 }
