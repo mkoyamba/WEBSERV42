@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/09 17:27:59 by bade-lee          #+#    #+#             */
-/*   Updated: 2023/06/11 16:04:09 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/18 14:39:54 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 Request::Request(std::string request_message, Server server) {
 	handle_method(request_message);
 	handle_path(request_message, server);
+	handle_body(request_message);
 }
 
 void	Request::handle_method(std::string request_message) {
@@ -76,4 +77,15 @@ bool	Request::check_path(std::string path, Server server) {
 			check = true;
 	}
 	return check;
+}
+
+void	Request::handle_body(std::string request_message) {
+	size_t	begin;
+
+	begin = request_message.find("\r\n\r\n");
+	if (begin == std::string::npos)
+		return ;
+	else {
+		_body = request_message.substr(begin + 4, std::string::npos);
+	}
 }

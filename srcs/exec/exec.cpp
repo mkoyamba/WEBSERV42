@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/08 11:43:05 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/12 17:34:23 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/18 14:43:19 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,8 +98,7 @@ void	send_file(std::string file, int client_socket, Server server, std::string c
 		size -= send(client_socket, response.c_str(), response.size(), 0);
 }
 
-void	handle_request(Request request, int client_sock, Server server) {
-	
+void	handle_get(Request request, int client_sock, Server server) {
 	if (!request.getPath().compare("NULL") && !request.getMethod().compare("GET")) {
 		send_file(server.getRoot() + server.getErrorPage(404), client_sock, server, "404 Not Found", "text/html");
 		return ;
@@ -129,6 +128,24 @@ void	handle_request(Request request, int client_sock, Server server) {
 			index += server.getIndex();
 		send_file(index, client_sock, server, "200 OK", "text/html");
 	}
+}
+
+void	handle_post(Request request, int client_sock, Server server) {
+	(void)request, (void)client_sock, (void)server;
+	std::cout << "DEBUG >> " << request.getBody().size() << std::endl;
+}
+
+void	handle_delete(Request request, int client_sock, Server server) {
+	(void)request, (void)client_sock, (void)server;
+}
+
+void	handle_request(Request request, int client_sock, Server server) {
+	if (!request.getMethod().compare("GET"))
+		handle_get(request, client_sock, server);
+	else if (!request.getMethod().compare("POST"))
+		handle_post(request, client_sock, server);
+	else if (!request.getMethod().compare("DELETE"))
+		handle_delete(request, client_sock, server);
 }
 
 int	exec_port(int socket, int kq) {
@@ -167,7 +184,8 @@ int	split_servers(Config config) {
 			int socket = exec_server_sock(listens[j], pairs, config.getServer(i));
 			if (socket == -1)
 				return 1;
-			exec_port(socket, kq);
+			try { exec_port(socket, kq); }
+			catch (std::exception &e) { throw e; };
 		}
 	}
 	while (true) {
@@ -179,15 +197,18 @@ int	split_servers(Config config) {
 			for (int i = 0; i < nev; i++) {
 				int addr_len = sizeof(pairs[evlist[i].ident].first);
 				int client_sock = accept(evlist[i].ident, (struct sockaddr *)&pairs[evlist[i].ident].first, (socklen_t*)&addr_len);
+				if (client_sock < 0)
+					throw std::runtime_error("Error accepting connection");
 				char buffer[4097];
 				int j = read(client_sock, buffer, 4096);
 				if (j == -1)
-					return 1;
+					throw std::runtime_error("Error reading connection");
 				buffer[j] = '\0';
 				std::string request_str(buffer);
 				std::cout << request_str << std::endl;
 				Request request(request_str, pairs[evlist[i].ident].second);
 				handle_request(request, client_sock, pairs[evlist[i].ident].second);
+				close (client_sock);
 			}	
 		}
 	}

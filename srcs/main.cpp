@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 17:09:10 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/12 16:14:06 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/18 14:21:56 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -151,5 +151,10 @@ int	main(int argc, char **argv) {
 	if (check)
 		return check;
 	//print_test(config);
-	return split_servers(config);
+	try { check = split_servers(config); }
+	catch (std::exception &e) {
+		std::cerr << e.what() << std::endl;
+		check = 1;
+	}
+	return check;
 }
