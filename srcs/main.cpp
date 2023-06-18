@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
+/*   By: bade-lee <bade-lee@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 17:09:10 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/18 14:21:56 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/18 15:14:40 by bade-lee         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,7 +146,12 @@ int	main(int argc, char **argv) {
 		return 1;
 	}
 	std::string filename(argv[1]);
-	Config config(filename);
+	Config config;
+	try {config.handle_file(filename); }
+	catch (std::exception &e) {
+		std::cerr << e.what() << std::endl;
+		return 1;
+	}
 	int check = config.check_content();
 	if (check)
 		return check;

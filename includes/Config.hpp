@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
+/*   By: bade-lee <bade-lee@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 17:18:49 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/12 13:22:58 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/18 15:12:38 by bade-lee         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,12 +19,13 @@ class Server;
 
 class Config {
 	public:
-		Config(std::string filename);
+		Config();
 		~Config() {};
 
 		Server	&getServer(int index) { return _servers[index]; };
 		size_t	size(void) { return _servers.size(); };
 
+		void	handle_file(std::string filename);
 		int		check_content(void);
 
 	private:
