@@ -6,7 +6,7 @@
 /*   By: bade-lee <bade-lee@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 17:18:49 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/18 15:12:38 by bade-lee         ###   ########.fr       */
+/*   Updated: 2023/06/18 18:28:33 by bade-lee         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ class Config {
 
 		void	handle_file(std::string filename);
 		int		check_content(void);
+		void	check_ports(void);
 
 	private:
 		std::vector<Server>	_servers;

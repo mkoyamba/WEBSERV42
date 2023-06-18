@@ -6,7 +6,7 @@
 /*   By: bade-lee <bade-lee@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 18:09:28 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/18 16:01:44 by bade-lee         ###   ########.fr       */
+/*   Updated: 2023/06/18 18:48:35 by bade-lee         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,6 +78,26 @@ void	Config::handle_file(std::string filename) {
 	for (size_t i = 0; i < servers_str.size(); i++) {
 		Server server(servers_str[i]);
 		_servers.push_back(server);
+	}
+	check_ports();
+}
+
+void	Config::check_ports(void) {
+	std::vector<int> ports;
+	for (size_t i = 0; i < size(); i++) {
+		for (size_t j = 0; j < _servers[i].getListen().size(); j++){
+			ports.push_back(_servers[i].getListen()[j].second);
+		}
+	}
+	for (size_t i = 0; i < ports.size(); i++) {
+		for (size_t j = 0; j < ports.size(); j++) {
+			if (i == ports.size() - 1 && j == ports.size() - 1)
+				break;
+			if (i == j)
+				j++;
+			if (ports[i] == ports[j])
+				throw std::runtime_error("Error: Ports error.");
+		}
 	}
 }
 
