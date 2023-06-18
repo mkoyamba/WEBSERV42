@@ -6,7 +6,7 @@
 /*   By: bade-lee <bade-lee@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 18:09:28 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/18 15:24:56 by bade-lee         ###   ########.fr       */
+/*   Updated: 2023/06/18 16:01:44 by bade-lee         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,12 +45,8 @@ std::vector<std::string>	split_servers(std::string config) {
 	size_t	begin;
 	size_t	end;
 	size_t	nb;
-	size_t	next;
 
 	begin = config.find("server");
-	next = config.find("server", begin + 6);
-	while (config[next + 6] == '_')
-		next = config.find("server", next + 6);
 	while (begin != std::string::npos) {
 		end = config.find('{');
 		nb = 1;
