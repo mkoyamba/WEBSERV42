@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/20 11:05:21 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/20 12:34:51 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/20 12:50:05 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ void	print_listens(Config &config, int server) {
 	std::vector<std::pair<std::string, int> >	listen = config.getServer(server).getListen();
 
 	for (size_t i = 0; i < listen.size(); i++) {
-		std::cout << "\t|\tHost {" << listen[i].first << "} Port {" << listen[i].second << '}' <<std::endl;
+		std::cout << "\t|\t" << YELLOW << "Host " << NONE << "{" << listen[i].first << "} " << YELLOW << "Port " << NONE << "{" << listen[i].second << '}' << GREEN <<std::endl;
 	}
 	std::cout << std::endl;
 }
@@ -60,7 +60,7 @@ void	print_methods_location(std::map<std::string, Location>::iterator it) {
 void	print_errors(Config &config, int server) {
 	for (int i = 0; i < 999; i++)
 		if (config.getServer(server).getErrorPage(i).compare(""))
-			std::cout << "\t|\t" << i << " -> " << config.getServer(server).getErrorPage(i) << std::endl;
+			std::cout << "\t|\t" << YELLOW << i << " -> " << NONE << config.getServer(server).getErrorPage(i) << GREEN << std::endl;
 }
 
 void	print_errors_location(std::map<std::string, Location>::iterator it) {
@@ -125,8 +125,6 @@ void	print_servers(Config &config) {
 		std::cout << "\t║ Client max body size : " << config.getServer(i).getBodySize() << std::endl;
 		std::cout << "\t║ Autoindex status : " << config.getServer(i).getAutoIndex() << std::endl;
 		std::cout << "\t║ Upload status : " << config.getServer(i).getUpload() << std::endl;
-		std::cout << "\t║ Methods : ";
-		print_methods(config, i);
 		std::cout << "\t║ Extensions : ";
 		print_extensions(config, i);
 		std::cout << "\t==============================" << NONE << std::endl;

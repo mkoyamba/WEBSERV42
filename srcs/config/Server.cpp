@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 18:09:48 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/12 13:33:56 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/20 12:53:26 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -200,6 +200,8 @@ void	Server::handle_listen(std::string server) {
 			end = current.find('\n', begin);
 		port_str = current.substr(begin, end - begin);
 		if (valid_host(host) && port_str.find_first_not_of("0123456789") == std::string::npos && port_str.size() < 5) {
+			if (!host.compare("127.0.0.1"))
+				host = "localhost";
 			std::istringstream(port_str) >> port;
 			pair = std::make_pair(host, port);
 			_listen.push_back(pair);

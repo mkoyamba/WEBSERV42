@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 17:10:06 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/20 12:01:58 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/20 12:43:08 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@
 #define PURPLE_B	"\033[1;35m"
 
 class Config;
+class Request;
 
 int		split_servers(Config &config);
 int		exec_loop(Server server, std::pair<std::string, int> listen_pair);

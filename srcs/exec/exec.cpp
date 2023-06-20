@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/08 11:43:05 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/20 12:33:28 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/20 13:00:48 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,11 +24,11 @@ int	server_socket(std::pair<std::string, int> listen_pair, sockaddr_in &sockaddr
 	sockaddr.sin_port = htons(listen_pair.second);
 
 	if (bind(sockfd, (struct sockaddr*)&sockaddr, sizeof(sockaddr)) < 0) {
-		std::cout << "Failed to bind to port " << listen_pair.second << std::endl;
+		std::cout << RED << "\n\nFailed to bind to port " << listen_pair.second << std::endl;
 		return -1;
 	}
 	if (listen(sockfd, 1) < 0) {
-		std::cout << "Failed to listen on socket." << std::endl;
+		std::cout << RED << "\n\nFailed to listen on socket." << std::endl;
 		return -1;
 	}
 	std::cout << "{" << listen_pair.second << "} ";
@@ -247,6 +247,7 @@ int	split_servers(Config &config) {
 			throw std::runtime_error("Error waiting for events");
 		else if (nev > 0) {
 			for (int i = 0; i < nev; i++) {
+				std::cerr << "HERE" << std::endl;
 				int fd = evlist[i].ident;
 				int filter = evlist[i].filter;
 				if (filter == EVFILT_READ || filter == EVFILT_WRITE) {
