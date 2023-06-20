@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/08 11:43:05 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/20 13:00:48 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/20 15:30:04 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,9 +18,16 @@ int	server_socket(std::pair<std::string, int> listen_pair, sockaddr_in &sockaddr
 		std::cout << "Failed to create socket. errno: " << errno << std::endl;
 		return 1;
 	}
+	bzero(&sockaddr, sizeof(sockaddr));
+	int	r = fcntl(sockfd, F_SETFL, O_NONBLOCK);
+	if (r < 0)
+	{
+		close(sockfd);
+		throw std::runtime_error("fcntl() failed");
+	}
 
 	sockaddr.sin_family = AF_INET;
-	sockaddr.sin_addr.s_addr = INADDR_ANY;
+	sockaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	sockaddr.sin_port = htons(listen_pair.second);
 
 	if (bind(sockfd, (struct sockaddr*)&sockaddr, sizeof(sockaddr)) < 0) {
@@ -101,18 +108,31 @@ void	send_file(std::string file, int client_socket, Server server, std::string c
 		size -= send(client_socket, response.c_str(), response.size(), 0);
 }
 
+void	redirect(int client_sock, std::string redirection) {
+	std::string	response("HTTP/1.1 301 Moved Permanently\r\n");
+	response += "Location: ";
+	response += redirection;
+	response += "\r\n";
+	response += "Content-Length: 0\r\n\r\n";
+	send(client_sock, response.c_str(), response.size(), 0);
+}
+
 void	handle_get(Request request, int client_sock, Server server) {
 	if (!request.getPath().compare("NULL") && !request.getMethod().compare("GET")) {
 		send_file(server.getRoot() + server.getErrorPage(404), client_sock, server, "404 Not Found", "text/html");
 		return ;
 	}
-	if (request.getFile() && !request.getMethod().compare("GET")) {
+	else if (request.getFile() && !request.getMethod().compare("GET")) {
 		send_file(request.getPath(), client_sock, server, "202 OK", request.getExtension());
 		return ;
 	}
 	else if (!request.getMethod().compare("GET")) {
 		Location	location = server.getLocations()[request.getPath()];
 		std::string	index;
+		if (location.getRedirect().compare("")) {
+			redirect(client_sock, location.getRedirect());
+			return ;
+		}
 		if (location.getRoot().compare(""))
 			index += location.getRoot();
 		else
@@ -173,10 +193,10 @@ Socket	exec_server_sock(std::pair<std::string, int> listen, Server &server) {
 
 int	read_request(int client_sock, Socket socket) {
 	char buffer[4097];
+	bzero(buffer, 4097);
 	int j = read(client_sock, buffer, 4096);
-	if (j == -1)
-		throw std::runtime_error("Error reading connection");
-	buffer[j] = '\0';
+	while (j == -1)
+		j = read(client_sock, buffer, 4096);
 	std::string request_str(buffer);
 	Request request(request_str, *socket.getServer());
 	print_request(request);
@@ -203,8 +223,7 @@ int	fill_sockets(Config &config, int kq) {
 void	get_connections(Socket &socket) {
 	int new_socket = 0;
 
-	while (new_socket != -1)
-	{
+	while(new_socket != -1) {
 		int addressLen = sizeof(socket.getServerAddr());
 		new_socket = accept(socket.getServerSocket(), (struct sockaddr *)&socket.getServerAddr(), (socklen_t *)&addressLen);
 		if (new_socket < 0)
@@ -216,7 +235,7 @@ void	get_connections(Socket &socket) {
 	}
 }
 
-void	split_event(int fd, int filter, Config config) {
+void	split_event(int fd, Config config) {
 	for (size_t i = 0; i < config.getSockets().size(); i++) {
 		std::vector<int>	client_sockets = config.getSockets()[i].getClientSockets();
 		if (config.getSockets()[i].getServerSocket() == fd) {
@@ -224,10 +243,6 @@ void	split_event(int fd, int filter, Config config) {
 			for (size_t j = 0; j < config.getSockets()[i].getClientSockets().size(); j++) {
 				close(config.getSockets()[i].getClientSockets()[j]);
 			}
-		}
-		else if (std::find(client_sockets.begin(), client_sockets.end(), fd) != client_sockets.end()) {
-			std::cout << "DEBUG" << std::endl;
-			(void)filter;
 		}
 	}
 }
@@ -247,12 +262,10 @@ int	split_servers(Config &config) {
 			throw std::runtime_error("Error waiting for events");
 		else if (nev > 0) {
 			for (int i = 0; i < nev; i++) {
-				std::cerr << "HERE" << std::endl;
 				int fd = evlist[i].ident;
 				int filter = evlist[i].filter;
-				if (filter == EVFILT_READ || filter == EVFILT_WRITE) {
-					split_event(fd, filter, config);
-				}
+				if (filter == EVFILT_READ || filter == EVFILT_WRITE)
+					split_event(fd, config);
 			}
 		}
 	}

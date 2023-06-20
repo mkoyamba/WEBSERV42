@@ -106,6 +106,6 @@ server {
 
 	location /redirection {
 		allow_methods GET POST
-		redirect https://42.fr/
+		redirect https://google.com/
 	}
 }
