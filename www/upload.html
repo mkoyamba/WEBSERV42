@@ -1,26 +1,18 @@
+<!DOCTYPE html>
 <html>
-
-<title>MASTERMIND</title>
-<h1 style="color:whitesmoke;">Upload page</h1>
-
-<h3 style="color:whitesmoke;">Upload a file on the server here :</h3>
-<br>
-<form action="upload.php" method="post" enctype="multipart/form-data">
-	<label for="file"></label>
-	<input id="file" name="file" type="file" />
-	<button>Upload</button>
-</form>
-<br>
-<br>
-<h3 style="color:whitesmoke;" >Come back to <a href=".." style="color:red;"> Homepage </a></h3>
-
-<body style="background-color:#363535;">
-
-
+<body>
+    <h1>Show File-select Fields</h1>
+  
+    <h3>
+        Show a file-select field which allows
+        only one file to be chosen:
+    </h3>
+  
+    <form action="upload.py" method="post" enctype="multipart/form-data">
+		<input type="file" name="file">
+		<input type="submit" value="Upload">
+	</form>
+	  
 </body>
-</html>
-<body style="background-color:#363535;">
-
-
-</body>
+  
 </html>

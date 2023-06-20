@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bade-lee <bade-lee@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 18:09:28 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/18 18:48:35 by bade-lee         ###   ########.fr       */
+/*   Updated: 2023/06/19 13:00:21 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,7 +84,7 @@ void	Config::handle_file(std::string filename) {
 
 void	Config::check_ports(void) {
 	std::vector<int> ports;
-	for (size_t i = 0; i < size(); i++) {
+	for (size_t i = 0; i < serverSize(); i++) {
 		for (size_t j = 0; j < _servers[i].getListen().size(); j++){
 			ports.push_back(_servers[i].getListen()[j].second);
 		}

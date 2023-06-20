@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/09 17:27:59 by bade-lee          #+#    #+#             */
-/*   Updated: 2023/06/18 14:39:54 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/18 15:57:57 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,13 +79,27 @@ bool	Request::check_path(std::string path, Server server) {
 	return check;
 }
 
-void	Request::handle_body(std::string request_message) {
-	size_t	begin;
+void Request::handle_body(std::string request_message)
+{
+	std::stringstream ss(request_message);
+	std::string token;
 
-	begin = request_message.find("\r\n\r\n");
-	if (begin == std::string::npos)
-		return ;
-	else {
-		_body = request_message.substr(begin + 4, std::string::npos);
+	while (std::getline(ss, token))
+	{
+		if (token == "\r")
+			break;
+
+		size_t colon_pos = token.find(':');
+		if (colon_pos != std::string::npos)
+		{
+			std::string key = token.substr(0, colon_pos);
+			std::string value = token.substr(colon_pos + 1);
+			value.erase(0, value.find_first_not_of(" \t"));
+			value.erase(value.find_last_not_of(" \t") + 1);
+
+			_header[key] = value;
+		}
 	}
+	std::string remaining_string((std::istreambuf_iterator<char>(ss)), std::istreambuf_iterator<char>());
+	_body = remaining_string;
 }

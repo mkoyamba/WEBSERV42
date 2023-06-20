@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 17:10:06 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/12 14:26:04 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/20 12:01:58 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,9 +33,21 @@
 # define GET	1
 # define POST	2
 
+#define NONE	"\033[m"
+#define PURPLE	"\033[0;35m"
+#define BLUE	"\033[0;34m"
+#define YELLOW	"\033[0;33m"
+#define GREEN	"\033[0;32m"
+#define RED		"\033[0;31m"
+#define GREY	"\033[0;30m"
+#define PURPLE_B	"\033[1;35m"
+
 class Config;
 
-int	split_servers(Config config);
-int	exec_loop(Server server, std::pair<std::string, int> listen_pair);
+int		split_servers(Config &config);
+int		exec_loop(Server server, std::pair<std::string, int> listen_pair);
+void	print_servers(Config &config);
+void	print_request(Request request);
+void	print_response(Request response, std::string str);
 
 #endif

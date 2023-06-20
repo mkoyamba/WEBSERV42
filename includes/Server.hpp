@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 17:42:18 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/12 16:25:46 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/19 12:49:35 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,8 @@ class Server {
 	public:
 		Server() {};
 		Server(std::string server);
-		~Server() {};
+		virtual ~Server() {};
+		Server	&operator=(const Server &server);
 
 		std::string									getName(void) { return _name; };
 		std::string									getRoot(void) { return _root; };

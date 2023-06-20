@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/08 11:43:05 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/18 14:43:19 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/20 12:33:28 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@ int	server_socket(std::pair<std::string, int> listen_pair, sockaddr_in &sockaddr
 		std::cout << "Failed to create socket. errno: " << errno << std::endl;
 		return 1;
 	}
+
 	sockaddr.sin_family = AF_INET;
 	sockaddr.sin_addr.s_addr = INADDR_ANY;
 	sockaddr.sin_port = htons(listen_pair.second);
@@ -30,7 +31,7 @@ int	server_socket(std::pair<std::string, int> listen_pair, sockaddr_in &sockaddr
 		std::cout << "Failed to listen on socket." << std::endl;
 		return -1;
 	}
-	std::cout << "Listening to port " << listen_pair.second << std::endl;
+	std::cout << "{" << listen_pair.second << "} ";
 	return sockfd;
 }
 
@@ -46,17 +47,19 @@ std::string	daytime(void) {
 	return time;
 }
 
-void	send_image(char *str, int client_socket) {
+void	send_image(char *str, int client_socket, Server server, std::string response) {
 	FILE	*picture;
 	picture = fopen(str, "r");
 	if (!picture) {
-		send_image((char *)"assets/default.png", client_socket);
+		send_image((char *)"assets/default.png", client_socket, server, response);
 		return ;
 	}
 	fseek(picture, 0, SEEK_END);
 	int size = ftell(picture);
 	std::string	size_str = "Content-Length: " + std::to_string(size) + "\r\n\n";
-	std::cerr << size_str + "==============================\n" << std::endl;
+	std::string	to_print(response + "File: " + std::string(str) + "\n");
+	Request responseC(to_print + size_str, server);
+	print_response(responseC, to_print + size_str);
 	send(client_socket, size_str.c_str(), size_str.size(), 0);
 	fclose(picture);
 	int fd = open(str, O_RDONLY);
@@ -76,10 +79,9 @@ void	send_file(std::string file, int client_socket, Server server, std::string c
 	response += "Content-Type: " + type + "\r\n";
 	std::string	content;
 	if (!code.compare("202 OK")) {
-		std::cerr << "==============================\nRESPONSE : " + response;
 		send(client_socket, response.c_str(), response.size(), 0);
 		file = "assets" + file;
-		send_image((char *)file.c_str(), client_socket);
+		send_image((char *)file.c_str(), client_socket, server, response);
 		return ;
 	}
 	else if (file.compare("")) {
@@ -91,8 +93,9 @@ void	send_file(std::string file, int client_socket, Server server, std::string c
 	else
 		content = "<h1>ERROR 404 - Page not found</h1>";
 	response += "Content-Length: " + std::to_string(content.size()) + "\r\n\n";
+	Request responseC("File: " + file + "\n" + response, server);
+	print_response(responseC, response);
 	response += content + "\r\n";
-	std::cerr << "==============================\nRESPONSE : " + response + file + "==============================\n" << std::endl;
 	size_t	size = response.size();
 	while (size > 0)
 		size -= send(client_socket, response.c_str(), response.size(), 0);
@@ -132,7 +135,8 @@ void	handle_get(Request request, int client_sock, Server server) {
 
 void	handle_post(Request request, int client_sock, Server server) {
 	(void)request, (void)client_sock, (void)server;
-	std::cout << "DEBUG >> " << request.getBody().size() << std::endl;
+	std::map<std::string, std::string> header = request.getHeader();
+	std::map<std::string, std::string>::iterator	it;
 }
 
 void	handle_delete(Request request, int client_sock, Server server) {
@@ -153,41 +157,89 @@ int	exec_port(int socket, int kq) {
 
 	EV_SET(&result, socket, EVFILT_READ, EV_ADD, 0, 0, 0);
 	if (kevent(kq, &result, 1, nullptr, 0, nullptr) == -1)
-		throw std::runtime_error("Error adding event to kqueue");
+		std::cerr << "Error adding socket to kqueue" << std::endl;
 	return 0;
 }
 
-int	exec_server_sock(std::pair<std::string, int> listens, std::map<int, std::pair<sockaddr_in, Server> > &pairs, Server server) {
-	std::pair<sockaddr_in, Server>	socket_ad;
-	socket_ad.second = server;
-	int s = server_socket(listens, socket_ad.first);
-	if (s == -1)
-		return s;
-	pairs[s] = socket_ad;
-	return s;
+Socket	exec_server_sock(std::pair<std::string, int> listen, Server &server) {
+	Socket	socket;
+
+	socket.setServerSocket(server_socket(listen, socket.getServerAddr()));
+	if(socket.getServerSocket() == -1)
+		throw std::runtime_error("Error setting up server socket");
+	socket.setServer(&server);
+	return socket;
 }
 
-int	split_servers(Config config) {
-	
-	size_t	size = config.size();
-	std::map<int, std::pair<sockaddr_in, Server> >	pairs;
-	std::vector<struct kevent>							events;
-	int											kq;
+int	read_request(int client_sock, Socket socket) {
+	char buffer[4097];
+	int j = read(client_sock, buffer, 4096);
+	if (j == -1)
+		throw std::runtime_error("Error reading connection");
+	buffer[j] = '\0';
+	std::string request_str(buffer);
+	Request request(request_str, *socket.getServer());
+	print_request(request);
+	handle_request(request, client_sock, *socket.getServer());
+	return 0;
+}
 
-	kq = kqueue();
-	if (kq == -1)
-		return 1;
+int	fill_sockets(Config &config, int kq) {
+	
+	size_t	size = config.serverSize();
+
 	for (size_t i = 0; i < size; i++) {
 		std::vector<std::pair<std::string, int> >	listens;
 		listens = config.getServer(i).getListen();
 		for (size_t j = 0; j < listens.size(); j++) {
-			int socket = exec_server_sock(listens[j], pairs, config.getServer(i));
-			if (socket == -1)
-				return 1;
-			try { exec_port(socket, kq); }
-			catch (std::exception &e) { throw e; };
+			config.getSockets().push_back(exec_server_sock(listens[j], config.getServer(i)));
+			exec_port(config.getSockets().back().getServerSocket(), kq);
 		}
 	}
+	std::cout << NONE << std::endl;
+	return 0;
+}
+
+void	get_connections(Socket &socket) {
+	int new_socket = 0;
+
+	while (new_socket != -1)
+	{
+		int addressLen = sizeof(socket.getServerAddr());
+		new_socket = accept(socket.getServerSocket(), (struct sockaddr *)&socket.getServerAddr(), (socklen_t *)&addressLen);
+		if (new_socket < 0)
+			new_socket = -1;
+		else {
+			socket.getClientSockets().push_back(new_socket);
+			read_request(new_socket, socket);
+		}
+	}
+}
+
+void	split_event(int fd, int filter, Config config) {
+	for (size_t i = 0; i < config.getSockets().size(); i++) {
+		std::vector<int>	client_sockets = config.getSockets()[i].getClientSockets();
+		if (config.getSockets()[i].getServerSocket() == fd) {
+			get_connections(config.getSockets()[i]);
+			for (size_t j = 0; j < config.getSockets()[i].getClientSockets().size(); j++) {
+				close(config.getSockets()[i].getClientSockets()[j]);
+			}
+		}
+		else if (std::find(client_sockets.begin(), client_sockets.end(), fd) != client_sockets.end()) {
+			std::cout << "DEBUG" << std::endl;
+			(void)filter;
+		}
+	}
+}
+
+int	split_servers(Config &config) {
+	std::vector<struct kevent>	events;
+	int	kq;
+
+	kq = kqueue();
+	if (kq == -1)
+		return 1;
+	fill_sockets(config, kq);
 	while (true) {
 		struct kevent	evlist[1024];
 		int	nev = kevent(kq, NULL, 0, evlist, 1024, NULL);
@@ -195,21 +247,12 @@ int	split_servers(Config config) {
 			throw std::runtime_error("Error waiting for events");
 		else if (nev > 0) {
 			for (int i = 0; i < nev; i++) {
-				int addr_len = sizeof(pairs[evlist[i].ident].first);
-				int client_sock = accept(evlist[i].ident, (struct sockaddr *)&pairs[evlist[i].ident].first, (socklen_t*)&addr_len);
-				if (client_sock < 0)
-					throw std::runtime_error("Error accepting connection");
-				char buffer[4097];
-				int j = read(client_sock, buffer, 4096);
-				if (j == -1)
-					throw std::runtime_error("Error reading connection");
-				buffer[j] = '\0';
-				std::string request_str(buffer);
-				std::cout << request_str << std::endl;
-				Request request(request_str, pairs[evlist[i].ident].second);
-				handle_request(request, client_sock, pairs[evlist[i].ident].second);
-				close (client_sock);
-			}	
+				int fd = evlist[i].ident;
+				int filter = evlist[i].filter;
+				if (filter == EVFILT_READ || filter == EVFILT_WRITE) {
+					split_event(fd, filter, config);
+				}
+			}
 		}
 	}
 	return 0;

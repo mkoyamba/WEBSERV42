@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: bade-lee <bade-lee@student.42.fr>          +#+  +:+       +#+         #
+#    By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/06/06 17:04:20 by mkoyamba          #+#    #+#              #
-#    Updated: 2023/06/09 17:29:17 by bade-lee         ###   ########.fr        #
+#    Updated: 2023/06/20 11:06:18 by mkoyamba         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -28,6 +28,7 @@ SRC =	main.cpp\
 SRC +=	Location.cpp\
 		Server.cpp\
 		Config.cpp\
+		prints.cpp\
 
 #EXEC
 SRC +=	exec.cpp\
