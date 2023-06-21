@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/08 11:43:05 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/20 15:30:04 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/21 12:34:19 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -235,15 +235,25 @@ void	get_connections(Socket &socket) {
 	}
 }
 
-void	split_event(int fd, Config config) {
+void	split_event(int fd, Config config, int filter, int kq) {
 	for (size_t i = 0; i < config.getSockets().size(); i++) {
 		std::vector<int>	client_sockets = config.getSockets()[i].getClientSockets();
+		size_t old_size = client_sockets.size();
 		if (config.getSockets()[i].getServerSocket() == fd) {
-			get_connections(config.getSockets()[i]);
-			for (size_t j = 0; j < config.getSockets()[i].getClientSockets().size(); j++) {
-				close(config.getSockets()[i].getClientSockets()[j]);
+			if (filter == EVFILT_READ) {
+				get_connections(config.getSockets()[i]);
+				for (size_t j = old_size; j < config.getSockets()[i].getClientSockets().size(); j++) {
+					struct kevent event;
+					EV_SET(&event, config.getSockets()[i].getClientSockets()[j], EVFILT_READ, EV_ADD, 0, 0, NULL);
+					if (kevent(kq, &event, 1, NULL, 0, NULL) == -1)
+						std::cerr << RED << "Error adding socket to kqueue." << NONE << std::endl;
+				}
+			}
+			else if (filter == EVFILT_WRITE) {
 			}
 		}
+		else if (std::find(config.getSockets()[i].getClientSockets().begin(), config.getSockets()[i].getClientSockets().end(), fd) != config.getSockets()[i].getClientSockets().end())
+			std::cerr << "HERE" << std::endl;
 	}
 }
 
@@ -265,7 +275,7 @@ int	split_servers(Config &config) {
 				int fd = evlist[i].ident;
 				int filter = evlist[i].filter;
 				if (filter == EVFILT_READ || filter == EVFILT_WRITE)
-					split_event(fd, config);
+					split_event(fd, config, filter, kq);
 			}
 		}
 	}
