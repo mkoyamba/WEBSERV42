@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 18:09:48 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/20 12:53:26 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/21 17:30:05 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -206,7 +206,7 @@ void	Server::handle_listen(std::string server) {
 			pair = std::make_pair(host, port);
 			_listen.push_back(pair);
 		}
-		while (current[end] == ' ')
+		while (end < current.size() - 1 && current[end] == ' ')
 			end++;
 		current.erase(0, end);
 	}
@@ -237,9 +237,7 @@ int	Server::check_content(void) {
 		std::cerr << "Error: the server must have at least 1 host:port" << std::endl;
 		return 40;
 	}
-	if (!_name.compare("")){
-		std::cerr << "Error: the server must have a name" << std::endl;
-		return 41;	
-	}
+	if (!_name.compare(""))
+		_name = "default";
 	return 0;
 }

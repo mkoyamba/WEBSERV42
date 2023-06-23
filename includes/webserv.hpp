@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 17:10:06 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/20 12:43:08 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/21 13:39:03 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@
 #define NONE	"\033[m"
 #define PURPLE	"\033[0;35m"
 #define BLUE	"\033[0;34m"
+#define BLUE_B	"\033[1;34m"
 #define YELLOW	"\033[0;33m"
 #define GREEN	"\033[0;32m"
 #define RED		"\033[0;31m"

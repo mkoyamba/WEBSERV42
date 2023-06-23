@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/08 11:43:05 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/21 12:34:19 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/21 17:22:33 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,9 +154,19 @@ void	handle_get(Request request, int client_sock, Server server) {
 }
 
 void	handle_post(Request request, int client_sock, Server server) {
-	(void)request, (void)client_sock, (void)server;
+	(void)client_sock, (void)server;
 	std::map<std::string, std::string> header = request.getHeader();
-	std::map<std::string, std::string>::iterator	it;
+	std::string raw_body = request.getBody();
+	size_t begin = raw_body.find("filename=") + 10;
+	std::cerr << RED << raw_body.find('\"', begin) - begin << std::endl;
+	std::string filename = raw_body.substr(begin, raw_body.find('\"', begin) - begin);
+	std::string delim = request.getHeader()["boundary"];
+	begin = raw_body.find("\r\n\r\n") + 4;
+	std::string body;
+	body = raw_body.substr(begin, raw_body.find(delim, begin) - begin - 4);
+	std::ofstream file("upload/" + filename);
+	file << body;
+	file.close();
 }
 
 void	handle_delete(Request request, int client_sock, Server server) {
@@ -252,8 +262,6 @@ void	split_event(int fd, Config config, int filter, int kq) {
 			else if (filter == EVFILT_WRITE) {
 			}
 		}
-		else if (std::find(config.getSockets()[i].getClientSockets().begin(), config.getSockets()[i].getClientSockets().end(), fd) != config.getSockets()[i].getClientSockets().end())
-			std::cerr << "HERE" << std::endl;
 	}
 }
 
@@ -269,7 +277,7 @@ int	split_servers(Config &config) {
 		struct kevent	evlist[1024];
 		int	nev = kevent(kq, NULL, 0, evlist, 1024, NULL);
 		if (nev == -1)
-			throw std::runtime_error("Error waiting for events");
+			return 1;
 		else if (nev > 0) {
 			for (int i = 0; i < nev; i++) {
 				int fd = evlist[i].ident;

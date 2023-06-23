@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/09 17:27:59 by bade-lee          #+#    #+#             */
-/*   Updated: 2023/06/20 14:53:27 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/21 16:54:17 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,6 +100,8 @@ void Request::handle_body(std::string request_message)
 			_header[key] = value;
 		}
 	}
+	size_t begin = request_message.find("boundary=") + 9;
+	_header["boundary"] = request_message.substr(begin, request_message.find("\r\n", begin) - begin);
 	std::string remaining_string((std::istreambuf_iterator<char>(ss)), std::istreambuf_iterator<char>());
 	_body = remaining_string;
 }

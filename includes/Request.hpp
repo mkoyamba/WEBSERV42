@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/09 17:24:45 by bade-lee          #+#    #+#             */
-/*   Updated: 2023/06/19 11:49:34 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/21 13:46:44 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,10 +26,12 @@ class Request {
 		std::string							getBody(void) { return _body; };
 		bool								getFile(void) { return _file; };
 		std::map<std::string, std::string>	getHeader(void) { return _header; };
+		void								setExtension(std::string ext) { _extension = ext; };
 
 		void		handle_method(std::string request_message);
 		void		handle_path(std::string request_message, Server server);
 		void		handle_body(std::string request_message);
+
 
 		bool		check_path(std::string path, Server server);
 
