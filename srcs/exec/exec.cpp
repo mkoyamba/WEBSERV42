@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/08 11:43:05 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/23 16:30:47 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/23 17:43:01 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,7 +154,6 @@ void	handle_get(Request request, int client_sock, Server server) {
 }
 
 void	handle_post(Request request, int client_sock, Server server) {
-	(void)client_sock, (void)server;
 	std::map<std::string, std::string> header = request.getHeader();
 	std::string raw_body = request.getBody();
 	size_t begin = raw_body.find("filename=") + 10;
@@ -175,6 +174,23 @@ void	handle_post(Request request, int client_sock, Server server) {
 	begin = raw_body.find("\r\n\r\n") + 4;
 	begin = raw_body.find("\r\n\r\n", begin) + 4;
 	body = raw_body.substr(begin, raw_body.find(delim, begin) - begin - 4);
+	if ((int)body.size() > server.getBodySize()) {
+		Location	location = server.getLocations()[request.getPath()];
+		std::string	index;
+		std::string	root = location.getRoot();
+		if (!root.compare(""))
+			root = server.getRoot();
+		root += "/";
+		index += root;
+		index += location.getErrorPage(413);
+		if (!index.compare(root))
+			index += server.getErrorPage(413);
+		if (!index.compare(root))
+			send_file("www/homepage.html", client_sock, server, "413 Content Too Large", "text/html");
+		else
+			send_file(index, client_sock, server, "413 Content Too Large", "text/html");
+		return ;
+	}
 	std::ofstream file("upload/" + filename);
 	file << body;
 	file.close();
@@ -236,7 +252,10 @@ int	fill_sockets(Config &config, int kq) {
 		std::vector<std::pair<std::string, int> >	listens;
 		listens = config.getServer(i).getListen();
 		for (size_t j = 0; j < listens.size(); j++) {
-			config.getSockets().push_back(exec_server_sock(listens[j], config.getServer(i)));
+			Socket socket;
+			try { socket = exec_server_sock(listens[j], config.getServer(i)); }
+			catch (std::exception &e) { throw e; };
+			config.getSockets().push_back(socket);
 			exec_port(config.getSockets().back().getServerSocket(), kq);
 		}
 	}
@@ -286,7 +305,8 @@ int	split_servers(Config &config) {
 	kq = kqueue();
 	if (kq == -1)
 		return 1;
-	fill_sockets(config, kq);
+	try { fill_sockets(config, kq); }
+	catch (std::exception &e) { throw e; };
 	while (true) {
 		struct kevent	evlist[1024];
 		int	nev = kevent(kq, NULL, 0, evlist, 1024, NULL);

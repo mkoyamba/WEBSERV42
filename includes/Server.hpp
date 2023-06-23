@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 17:42:18 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/19 12:49:35 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/23 17:12:42 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ class Server {
 		std::string									getRedirect(void) { return _redirect; };
 		std::string									getUploadPath(void) { return _upload_path; };
 		std::string									getCgiPath(void) { return _cgi_path; };
-		std::string									getBodySize(void) { return _body_size; };
+		int											getBodySize(void) { return _body_size; };
 		bool										getAutoIndex(void) { return _autoindex; };
 		bool										getUpload(void) { return _upload; };
 		std::string									getErrorPage(int index) { return _error_page[index]; };
@@ -47,6 +47,7 @@ class Server {
 		void										handle_methods(std::string server);
 		void										handle_listen(std::string server);
 		void										handle_extensions(std::string server);
+		int											handle_bodySize(std::string size_str);
 
 		int											check_content(void);
 
@@ -63,7 +64,7 @@ class Server {
 		std::string									_redirect;
 		std::string									_upload_path;
 		std::string									_cgi_path;
-		std::string									_body_size;
+		int											_body_size;
 		bool										_autoindex;
 		bool										_upload;
 		std::vector<std::string>					_cgi_ext;

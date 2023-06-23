@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 18:09:48 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/21 17:30:05 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/23 17:25:26 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,29 @@ void	Server::handle_locations(std::string &server) {
 	}
 }
 
+int	Server::handle_bodySize(std::string size_str) {
+	size_t	multi = 1;
+	int		value;
+	if (size_str.find_first_not_of("0123456789") != std::string::npos &&
+		size_str.find_first_not_of("0123456789") != size_str.size() - 1)
+		return 0;
+	else if (size_str[size_str.size() - 1] != 'M' && size_str[size_str.size() - 1] != 'K')
+		return 0;
+	else if (size_str[size_str.size() - 1] == 'K') {
+		size_str.erase(size_str.size() - 1, std::string::npos);
+		multi = 1000;
+	}
+	else if (size_str[size_str.size() - 1] == 'M') {
+		size_str.erase(size_str.size() - 1, std::string::npos);
+		multi = 1000000;
+	}
+	if (size_str.size() > 4)
+		return 0;
+	std::istringstream(size_str) >> value;
+	return value * multi;
+
+}
+
 void	Server::handle_strings(std::string &server) {
 	size_t		begin;
 	size_t		end;
@@ -79,10 +102,13 @@ void	Server::handle_strings(std::string &server) {
 		end = server.find('\n', begin);
 		_cgi_path = server.substr(begin, end - begin);
 	}
+	_body_size = 1000000;
 	begin = server.find("client_max_body_size") + 21;
 	if (begin != std::string::npos + 21) {
 		end = server.find('\n', begin);
-		_body_size = server.substr(begin, end - begin);
+		_body_size =  handle_bodySize(server.substr(begin, end - begin));
+		if (_body_size == 0)
+			std::cerr << RED << "Wrong body size." << std::endl;
 	}
 }
 

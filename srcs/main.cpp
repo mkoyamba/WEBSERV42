@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 17:09:10 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/21 17:09:39 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/23 16:47:37 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,8 @@ int	main(int argc, char **argv) {
 		return check;
 	print_servers(config);
 	std::cout << PURPLE_B << "Listening to ports: ";
-	check = split_servers(config);
-	return check;
+	try { split_servers(config); }
+	catch(std::exception &e) {
+		return 1;}
+	return 0;
 }
