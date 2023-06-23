@@ -11,11 +11,11 @@ server {
 	error_page 403 /403.html
 	error_page 404 /404.html
 	error_page 405 /405.html
-	error_page 504 /504.html
 	error_page 413 /413.html
+	error_page 504 /504.html
 
-	root www
-	client_max_body_size 45K
+	root serv1
+	client_max_body_size 45M
 
 	location / {
 		index /homepage.html
@@ -60,9 +60,10 @@ server {
 	error_page 403 /403.html
 	error_page 404 /404.html
 	error_page 405 /405.html
+	error_page 413 /413.html
 	error_page 504 /504.html
 
-	root www
+	root serv2
 
 	location / {
 		index /homepage.html
