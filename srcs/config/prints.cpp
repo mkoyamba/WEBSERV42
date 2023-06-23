@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/20 11:05:21 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/21 14:02:39 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/23 16:10:45 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -157,8 +157,6 @@ void	print_request(Request request) {
 		std::cout << "|\tContent-Type:\t" << request.getHeader()["Content-Type"].substr(0, request.getHeader()["Content-Type"].find(";")) << std::endl;
 	if (request.getHeader()["Content-Length"].compare(""))
 		std::cout << "|\tContent-Length:\t" << request.getHeader()["Content-Length"] << std::endl;
-	if (request.getBody().compare(""))
-		std::cout << BLUE_B << "\tBody:\t" << request.getBody() << std::endl;
 	std::cout << NONE << std::endl;
 }
 

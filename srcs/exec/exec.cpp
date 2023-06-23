@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/08 11:43:05 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/21 17:22:33 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/23 16:30:47 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 int	server_socket(std::pair<std::string, int> listen_pair, sockaddr_in &sockaddr) {
 	int sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd == -1) {
-		std::cout << "Failed to create socket. errno: " << errno << std::endl;
+		std::cerr << "Failed to create socket" << std::endl;
 		return 1;
 	}
 	bzero(&sockaddr, sizeof(sockaddr));
@@ -31,11 +31,11 @@ int	server_socket(std::pair<std::string, int> listen_pair, sockaddr_in &sockaddr
 	sockaddr.sin_port = htons(listen_pair.second);
 
 	if (bind(sockfd, (struct sockaddr*)&sockaddr, sizeof(sockaddr)) < 0) {
-		std::cout << RED << "\n\nFailed to bind to port " << listen_pair.second << std::endl;
+		std::cerr << RED << "\n\nFailed to bind to port " << listen_pair.second << std::endl;
 		return -1;
 	}
 	if (listen(sockfd, 1) < 0) {
-		std::cout << RED << "\n\nFailed to listen on socket." << std::endl;
+		std::cerr << RED << "\n\nFailed to listen on socket." << std::endl;
 		return -1;
 	}
 	std::cout << "{" << listen_pair.second << "} ";
@@ -158,15 +158,27 @@ void	handle_post(Request request, int client_sock, Server server) {
 	std::map<std::string, std::string> header = request.getHeader();
 	std::string raw_body = request.getBody();
 	size_t begin = raw_body.find("filename=") + 10;
-	std::cerr << RED << raw_body.find('\"', begin) - begin << std::endl;
 	std::string filename = raw_body.substr(begin, raw_body.find('\"', begin) - begin);
 	std::string delim = request.getHeader()["boundary"];
-	begin = raw_body.find("\r\n\r\n") + 4;
+	char buff[100];
+	bzero(buff, 100);
+	std::string buffer;
+	int chars = read(client_sock, buff, 99);
+	while (chars > 0) {
+		for (int i = 0; i < chars; i++)
+			buffer.push_back(buff[i]);
+		bzero(buff, 100);
+		chars = read(client_sock, buff, 99);
+	}
+	raw_body += buffer;
 	std::string body;
+	begin = raw_body.find("\r\n\r\n") + 4;
+	begin = raw_body.find("\r\n\r\n", begin) + 4;
 	body = raw_body.substr(begin, raw_body.find(delim, begin) - begin - 4);
 	std::ofstream file("upload/" + filename);
 	file << body;
 	file.close();
+	send_file("www/upload.html", client_sock, server, "200 OK", "text/html");
 }
 
 void	handle_delete(Request request, int client_sock, Server server) {
@@ -207,7 +219,9 @@ int	read_request(int client_sock, Socket socket) {
 	int j = read(client_sock, buffer, 4096);
 	while (j == -1)
 		j = read(client_sock, buffer, 4096);
-	std::string request_str(buffer);
+	std::string request_str;
+	for (int i = 0; i < j; i++)
+		request_str.push_back(buffer[i]);
 	Request request(request_str, *socket.getServer());
 	print_request(request);
 	handle_request(request, client_sock, *socket.getServer());

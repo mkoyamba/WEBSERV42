@@ -45,11 +45,6 @@ server {
 		allow_methods POST
 	}
 
-	location /cgi {
-		index /credits.html
-		allow_methods GET POST
-	}
-
 	location /redirection {
 		allow_methods GET POST
 		redirect https://42.fr/
@@ -95,11 +90,6 @@ server {
 	location /method {
 		index /errors.html
 		allow_methods POST
-	}
-
-	location /cgi {
-		index /credits.html
-		allow_methods GET POST
 	}
 
 	location /redirection {
