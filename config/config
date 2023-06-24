@@ -8,6 +8,8 @@
 server {
 	listen 127.0.0.1:80 localhost:81
 
+	error_page 202 /202.html
+	error_page 204 /202.html
 	error_page 403 /403.html
 	error_page 404 /404.html
 	error_page 405 /405.html
@@ -30,6 +32,11 @@ server {
 	location /upload {
 		index /upload.html
 		allow_methods GET POST
+	}
+
+	location /delete {
+		index /delete.html
+		allow_methods GET DELETE
 	}
 
 	location /credits {
@@ -57,6 +64,8 @@ server {
 	listen localhost:5555 168.6.56.2:5556
 	server_name Secondary
 
+	error_page 202 /202.html
+	error_page 204 /202.html
 	error_page 403 /403.html
 	error_page 404 /404.html
 	error_page 405 /405.html
@@ -78,6 +87,11 @@ server {
 	location /upload {
 		index /upload.html
 		allow_methods GET POST
+	}
+
+	location /delete {
+		index /delete.html
+		allow_methods GET DELETE
 	}
 
 	location /credits {

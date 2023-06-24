@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+
+<html>
+
+<title>MASTERMIND</title>
+<h1 style="color:black;">Delete page</h1>
+
+<p style="color:black;">Select a file you want to delete :
+	<br>
+	<br>
+    <form>
+		<label for="fileName">File name:</label>
+		<input type="text" id="fileName" name="fileName" required>
+		<input type="submit" value="Submit" id="submitBtn">
+	</form>
+	<br>
+
+	<h3 style="color:black;" >Come back to <a href=".." style="color:blue;"> Homepage </a></h3>
+</p>
+
+<body style="background-color:#bbbbbb;">
+
+	<script>
+		let submitBtn = document.getElementById("submitBtn");
+		submitBtn.addEventListener("click", deleteFile);
+	
+		function deleteFile(event) {
+			event.preventDefault();
+			let xhr = new XMLHttpRequest();
+			let file = document.getElementsByName('fileName')[0].value;
+			xhr.open('DELETE', `http://localhost:5555/upload/${file}`);
+			xhr.send();
+			xhr.onload = function() {
+			  if (xhr.status === 200) {
+				window.location.href = "http://localhost:5555/delete.html";
+			} else {
+				  window.location.href = "http://localhost:5555/202.html";
+				  }
+			};
+		}
+	</script>
+
+</body>
+</html>
