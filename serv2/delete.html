@@ -28,7 +28,7 @@
 			event.preventDefault();
 			let xhr = new XMLHttpRequest();
 			let file = document.getElementsByName('fileName')[0].value;
-			xhr.open('DELETE', `http://localhost:5555/upload/${file}`);
+			xhr.open('DELETE', `${file}`);
 			xhr.send();
 			xhr.onload = function() {
 			  if (xhr.status === 200) {
