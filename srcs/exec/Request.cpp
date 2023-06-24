@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/09 17:27:59 by bade-lee          #+#    #+#             */
-/*   Updated: 2023/06/23 16:06:33 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/24 19:12:20 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ void	Request::handle_path(std::string request_message, Server server) {
 		end = request_message.find(' ', begin);
 		_path = request_message.substr(begin, end - begin);
 	}
-	if (!check_path(_path, server) && _path.find(".py") == std::string::npos)
+	if (!check_path(_path, server) && _path.find(".py") == std::string::npos && _method.compare("DELETE"))
 		_path = "NULL";
 	if (request_message.find(".jpg") != std::string::npos
 		|| request_message.find(".jpeg") != std::string::npos
