@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/08 11:43:05 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/23 17:43:01 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/25 15:04:10 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -197,17 +197,61 @@ void	handle_post(Request request, int client_sock, Server server) {
 	send_file("www/upload.html", client_sock, server, "200 OK", "text/html");
 }
 
-void	handle_delete(Request request, int client_sock, Server server) {
-	(void)request, (void)client_sock, (void)server;
+void	handle_delete(Request request, int client_sock, Server server, char **env) {
+	std::string path;
+	char	*arg[4];
+	int 	pip[2];
+
+	std::string	referer = request.getHeader()["Referer"];
+	size_t begin = referer.find("localhost") + 9;
+	std::string	location_str = referer.substr(begin, std::string::npos);
+	Location location = server.getLocations()[location_str];
+	path = "upload" + request.getPath();
+	std::string root = location.getRoot();
+	if (!root.compare(""))
+		root = server.getRoot();
+	root += "/";
+	std::string error = root;
+	error += location.getErrorPage(204);
+	if (!error.compare(root))
+		error += server.getErrorPage(204);
+	std::string cgi = server.getCgiPath() + "/delete.py";
+	arg[0] = (char *)"delete.py";
+	arg[1] = (char *)path.c_str();
+	arg[2] = (char *)error.c_str();
+	arg[3] = NULL;
+	pipe(pip);
+	pid_t	pid = fork();
+	if (pid < 0)
+		return ;
+	if (pid == 0) {
+		close(pip[0]);
+		dup2(pip[1], STDOUT_FILENO);
+		execve(cgi.c_str(), arg, env);
+		exit(0);
+	}
+	else {
+		waitpid(pid, NULL, 0);
+		close(pip[1]);
+		char buff[1000];
+		bzero(buff, 1000);
+		read(pip[0], buff, 999);
+		send(client_sock, buff, strlen(buff), 0);
+		std::string response_str;
+		for (size_t i = 0; i < strlen(buff); i++)
+			response_str.push_back(buff[i]);
+		Request	response(response_str, server);
+		print_response(response, response_str);
+	}
 }
 
-void	handle_request(Request request, int client_sock, Server server) {
+void	handle_request(Request request, int client_sock, Server server, char **env) {
 	if (!request.getMethod().compare("GET"))
 		handle_get(request, client_sock, server);
 	else if (!request.getMethod().compare("POST"))
 		handle_post(request, client_sock, server);
 	else if (!request.getMethod().compare("DELETE"))
-		handle_delete(request, client_sock, server);
+		handle_delete(request, client_sock, server, env);
 }
 
 int	exec_port(int socket, int kq) {
@@ -229,7 +273,7 @@ Socket	exec_server_sock(std::pair<std::string, int> listen, Server &server) {
 	return socket;
 }
 
-int	read_request(int client_sock, Socket socket) {
+int	read_request(int client_sock, Socket socket, char **env) {
 	char buffer[4097];
 	bzero(buffer, 4097);
 	int j = read(client_sock, buffer, 4096);
@@ -240,7 +284,7 @@ int	read_request(int client_sock, Socket socket) {
 		request_str.push_back(buffer[i]);
 	Request request(request_str, *socket.getServer());
 	print_request(request);
-	handle_request(request, client_sock, *socket.getServer());
+	handle_request(request, client_sock, *socket.getServer(), env);
 	return 0;
 }
 
@@ -263,7 +307,7 @@ int	fill_sockets(Config &config, int kq) {
 	return 0;
 }
 
-void	get_connections(Socket &socket) {
+void	get_connections(Socket &socket, char **env) {
 	int new_socket = 0;
 
 	while(new_socket != -1) {
@@ -273,18 +317,18 @@ void	get_connections(Socket &socket) {
 			new_socket = -1;
 		else {
 			socket.getClientSockets().push_back(new_socket);
-			read_request(new_socket, socket);
+			read_request(new_socket, socket, env);
 		}
 	}
 }
 
-void	split_event(int fd, Config config, int filter, int kq) {
+void	split_event(int fd, Config config, int filter, int kq, char **env) {
 	for (size_t i = 0; i < config.getSockets().size(); i++) {
 		std::vector<int>	client_sockets = config.getSockets()[i].getClientSockets();
 		size_t old_size = client_sockets.size();
 		if (config.getSockets()[i].getServerSocket() == fd) {
 			if (filter == EVFILT_READ) {
-				get_connections(config.getSockets()[i]);
+				get_connections(config.getSockets()[i], env);
 				for (size_t j = old_size; j < config.getSockets()[i].getClientSockets().size(); j++) {
 					struct kevent event;
 					EV_SET(&event, config.getSockets()[i].getClientSockets()[j], EVFILT_READ, EV_ADD, 0, 0, NULL);
@@ -298,7 +342,7 @@ void	split_event(int fd, Config config, int filter, int kq) {
 	}
 }
 
-int	split_servers(Config &config) {
+int	split_servers(Config &config, char **env) {
 	std::vector<struct kevent>	events;
 	int	kq;
 
@@ -317,7 +361,7 @@ int	split_servers(Config &config) {
 				int fd = evlist[i].ident;
 				int filter = evlist[i].filter;
 				if (filter == EVFILT_READ || filter == EVFILT_WRITE)
-					split_event(fd, config, filter, kq);
+					split_event(fd, config, filter, kq, env);
 			}
 		}
 	}

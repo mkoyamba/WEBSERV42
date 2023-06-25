@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 17:10:06 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/21 13:39:03 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/25 10:18:22 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@
 class Config;
 class Request;
 
-int		split_servers(Config &config);
+int		split_servers(Config &config, char **env);
 int		exec_loop(Server server, std::pair<std::string, int> listen_pair);
 void	print_servers(Config &config);
 void	print_request(Request request);

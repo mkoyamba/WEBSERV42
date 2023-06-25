@@ -6,13 +6,13 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 17:09:10 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/23 16:47:37 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/25 10:17:55 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/webserv.hpp"
 
-int	main(int argc, char **argv) {
+int	main(int argc, char **argv, char **env) {
 	if (argc != 2) {
 		std::cerr << "usage: ./webserv [configuration file]" << std::endl;
 		return 1;
@@ -29,7 +29,7 @@ int	main(int argc, char **argv) {
 		return check;
 	print_servers(config);
 	std::cout << PURPLE_B << "Listening to ports: ";
-	try { split_servers(config); }
+	try { split_servers(config, env); }
 	catch(std::exception &e) {
 		return 1;}
 	return 0;
