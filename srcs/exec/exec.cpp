@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/08 11:43:05 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/25 15:04:10 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/27 12:37:42 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,10 +32,12 @@ int	server_socket(std::pair<std::string, int> listen_pair, sockaddr_in &sockaddr
 
 	if (bind(sockfd, (struct sockaddr*)&sockaddr, sizeof(sockaddr)) < 0) {
 		std::cerr << RED << "\n\nFailed to bind to port " << listen_pair.second << std::endl;
+		close(sockfd);
 		return -1;
 	}
 	if (listen(sockfd, 1) < 0) {
 		std::cerr << RED << "\n\nFailed to listen on socket." << std::endl;
+		close(sockfd);
 		return -1;
 	}
 	std::cout << "{" << listen_pair.second << "} ";
@@ -105,7 +107,7 @@ void	send_file(std::string file, int client_socket, Server server, std::string c
 	response += content + "\r\n";
 	size_t	size = response.size();
 	while (size > 0)
-		size -= send(client_socket, response.c_str(), response.size(), 0);
+		size -= send(client_socket, response.c_str(), response.size(), 0);;
 }
 
 void	redirect(int client_sock, std::string redirection) {
@@ -323,27 +325,23 @@ void	get_connections(Socket &socket, char **env) {
 }
 
 void	split_event(int fd, Config config, int filter, int kq, char **env) {
+	(void)filter;
 	for (size_t i = 0; i < config.getSockets().size(); i++) {
 		std::vector<int>	client_sockets = config.getSockets()[i].getClientSockets();
 		size_t old_size = client_sockets.size();
 		if (config.getSockets()[i].getServerSocket() == fd) {
-			if (filter == EVFILT_READ) {
-				get_connections(config.getSockets()[i], env);
-				for (size_t j = old_size; j < config.getSockets()[i].getClientSockets().size(); j++) {
-					struct kevent event;
-					EV_SET(&event, config.getSockets()[i].getClientSockets()[j], EVFILT_READ, EV_ADD, 0, 0, NULL);
-					if (kevent(kq, &event, 1, NULL, 0, NULL) == -1)
-						std::cerr << RED << "Error adding socket to kqueue." << NONE << std::endl;
-				}
-			}
-			else if (filter == EVFILT_WRITE) {
+			get_connections(config.getSockets()[i], env);
+			for (size_t j = old_size; j < config.getSockets()[i].getClientSockets().size(); j++) {
+				struct kevent event;
+				EV_SET(&event, config.getSockets()[i].getClientSockets()[j], EVFILT_READ, EV_ADD, 0, 0, NULL);
+				if (kevent(kq, &event, 1, NULL, 0, NULL) == -1)
+					std::cerr << RED << "Error adding socket to kqueue." << NONE << std::endl;
 			}
 		}
 	}
 }
 
 int	split_servers(Config &config, char **env) {
-	std::vector<struct kevent>	events;
 	int	kq;
 
 	kq = kqueue();
