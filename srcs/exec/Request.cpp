@@ -6,13 +6,15 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/09 17:27:59 by bade-lee          #+#    #+#             */
-/*   Updated: 2023/06/24 19:12:20 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/30 12:45:54 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/Request.hpp"
 
 Request::Request(std::string request_message, Server server) {
+	if (!request_message.compare(""))
+		return ;
 	handle_method(request_message);
 	handle_path(request_message, server);
 	handle_body(request_message);

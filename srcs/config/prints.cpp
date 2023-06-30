@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/20 11:05:21 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/23 16:10:45 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/30 12:47:28 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,6 +140,8 @@ void	print_servers(Config &config) {
 }
 
 void	print_request(Request request) {
+	if (!request.getPath().compare(""))
+		return ;
 	std::cout << BLUE << "\n[REQUEST]" << std::endl;
 	if (request.getMethod().compare(""))
 		std::cout << "|\tMethod:\t\t" << request.getMethod() << std::endl;

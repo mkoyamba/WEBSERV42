@@ -6,43 +6,11 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/08 11:43:05 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/27 12:37:42 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/30 12:38:00 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/webserv.hpp"
-
-int	server_socket(std::pair<std::string, int> listen_pair, sockaddr_in &sockaddr) {
-	int sockfd = socket(AF_INET, SOCK_STREAM, 0);
-	if (sockfd == -1) {
-		std::cerr << "Failed to create socket" << std::endl;
-		return 1;
-	}
-	bzero(&sockaddr, sizeof(sockaddr));
-	int	r = fcntl(sockfd, F_SETFL, O_NONBLOCK);
-	if (r < 0)
-	{
-		close(sockfd);
-		throw std::runtime_error("fcntl() failed");
-	}
-
-	sockaddr.sin_family = AF_INET;
-	sockaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-	sockaddr.sin_port = htons(listen_pair.second);
-
-	if (bind(sockfd, (struct sockaddr*)&sockaddr, sizeof(sockaddr)) < 0) {
-		std::cerr << RED << "\n\nFailed to bind to port " << listen_pair.second << std::endl;
-		close(sockfd);
-		return -1;
-	}
-	if (listen(sockfd, 1) < 0) {
-		std::cerr << RED << "\n\nFailed to listen on socket." << std::endl;
-		close(sockfd);
-		return -1;
-	}
-	std::cout << "{" << listen_pair.second << "} ";
-	return sockfd;
-}
 
 std::string	daytime(void) {
 	time_t		rawtime;
@@ -199,7 +167,7 @@ void	handle_post(Request request, int client_sock, Server server) {
 	send_file("www/upload.html", client_sock, server, "200 OK", "text/html");
 }
 
-void	handle_delete(Request request, int client_sock, Server server, char **env) {
+void	handle_delete(Request request, int client_sock, Server server) {
 	std::string path;
 	char	*arg[4];
 	int 	pip[2];
@@ -229,7 +197,7 @@ void	handle_delete(Request request, int client_sock, Server server, char **env) 
 	if (pid == 0) {
 		close(pip[0]);
 		dup2(pip[1], STDOUT_FILENO);
-		execve(cgi.c_str(), arg, env);
+		execve(cgi.c_str(), arg, NULL);
 		exit(0);
 	}
 	else {
@@ -247,121 +215,25 @@ void	handle_delete(Request request, int client_sock, Server server, char **env) 
 	}
 }
 
-void	handle_request(Request request, int client_sock, Server server, char **env) {
+void	handle_request(Request request, int client_sock, Server server) {
 	if (!request.getMethod().compare("GET"))
 		handle_get(request, client_sock, server);
 	else if (!request.getMethod().compare("POST"))
 		handle_post(request, client_sock, server);
 	else if (!request.getMethod().compare("DELETE"))
-		handle_delete(request, client_sock, server, env);
+		handle_delete(request, client_sock, server);
 }
 
-int	exec_port(int socket, int kq) {
-	struct kevent result;
-
-	EV_SET(&result, socket, EVFILT_READ, EV_ADD, 0, 0, 0);
-	if (kevent(kq, &result, 1, nullptr, 0, nullptr) == -1)
-		std::cerr << "Error adding socket to kqueue" << std::endl;
-	return 0;
-}
-
-Socket	exec_server_sock(std::pair<std::string, int> listen, Server &server) {
-	Socket	socket;
-
-	socket.setServerSocket(server_socket(listen, socket.getServerAddr()));
-	if(socket.getServerSocket() == -1)
-		throw std::runtime_error("Error setting up server socket");
-	socket.setServer(&server);
-	return socket;
-}
-
-int	read_request(int client_sock, Socket socket, char **env) {
-	char buffer[4097];
-	bzero(buffer, 4097);
-	int j = read(client_sock, buffer, 4096);
-	while (j == -1)
-		j = read(client_sock, buffer, 4096);
-	std::string request_str;
-	for (int i = 0; i < j; i++)
-		request_str.push_back(buffer[i]);
-	Request request(request_str, *socket.getServer());
-	print_request(request);
-	handle_request(request, client_sock, *socket.getServer(), env);
-	return 0;
-}
-
-int	fill_sockets(Config &config, int kq) {
-	
-	size_t	size = config.serverSize();
-
-	for (size_t i = 0; i < size; i++) {
-		std::vector<std::pair<std::string, int> >	listens;
-		listens = config.getServer(i).getListen();
-		for (size_t j = 0; j < listens.size(); j++) {
-			Socket socket;
-			try { socket = exec_server_sock(listens[j], config.getServer(i)); }
-			catch (std::exception &e) { throw e; };
-			config.getSockets().push_back(socket);
-			exec_port(config.getSockets().back().getServerSocket(), kq);
-		}
+std::string	read_request(int client_sock) {
+	std::string request_str = "";
+	char buffer[101];
+	bzero(buffer, 101);
+	int j = read(client_sock, buffer, 100);
+	while (j > 0) {
+		for (int i = 0; i < j; i++)
+			request_str.push_back(buffer[i]);
+		bzero(buffer, 101);
+		j = read(client_sock, buffer, 100);
 	}
-	std::cout << NONE << std::endl;
-	return 0;
-}
-
-void	get_connections(Socket &socket, char **env) {
-	int new_socket = 0;
-
-	while(new_socket != -1) {
-		int addressLen = sizeof(socket.getServerAddr());
-		new_socket = accept(socket.getServerSocket(), (struct sockaddr *)&socket.getServerAddr(), (socklen_t *)&addressLen);
-		if (new_socket < 0)
-			new_socket = -1;
-		else {
-			socket.getClientSockets().push_back(new_socket);
-			read_request(new_socket, socket, env);
-		}
-	}
-}
-
-void	split_event(int fd, Config config, int filter, int kq, char **env) {
-	(void)filter;
-	for (size_t i = 0; i < config.getSockets().size(); i++) {
-		std::vector<int>	client_sockets = config.getSockets()[i].getClientSockets();
-		size_t old_size = client_sockets.size();
-		if (config.getSockets()[i].getServerSocket() == fd) {
-			get_connections(config.getSockets()[i], env);
-			for (size_t j = old_size; j < config.getSockets()[i].getClientSockets().size(); j++) {
-				struct kevent event;
-				EV_SET(&event, config.getSockets()[i].getClientSockets()[j], EVFILT_READ, EV_ADD, 0, 0, NULL);
-				if (kevent(kq, &event, 1, NULL, 0, NULL) == -1)
-					std::cerr << RED << "Error adding socket to kqueue." << NONE << std::endl;
-			}
-		}
-	}
-}
-
-int	split_servers(Config &config, char **env) {
-	int	kq;
-
-	kq = kqueue();
-	if (kq == -1)
-		return 1;
-	try { fill_sockets(config, kq); }
-	catch (std::exception &e) { throw e; };
-	while (true) {
-		struct kevent	evlist[1024];
-		int	nev = kevent(kq, NULL, 0, evlist, 1024, NULL);
-		if (nev == -1)
-			return 1;
-		else if (nev > 0) {
-			for (int i = 0; i < nev; i++) {
-				int fd = evlist[i].ident;
-				int filter = evlist[i].filter;
-				if (filter == EVFILT_READ || filter == EVFILT_WRITE)
-					split_event(fd, config, filter, kq, env);
-			}
-		}
-	}
-	return 0;
+	return request_str;
 }

@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 17:10:06 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/25 10:18:22 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/06/30 12:22:25 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,10 +46,14 @@
 class Config;
 class Request;
 
-int		split_servers(Config &config, char **env);
-int		exec_loop(Server server, std::pair<std::string, int> listen_pair);
-void	print_servers(Config &config);
-void	print_request(Request request);
-void	print_response(Request response, std::string str);
+int			split_servers(Config &config);
+int			exec_loop(Server server, std::pair<std::string, int> listen_pair);
+void		print_servers(Config &config);
+void		print_request(Request request);
+void		print_response(Request response, std::string str);
+void		split_event(int fd, Config &config, int filter, int kq);
+std::string	read_request(int client_sock);
+void		handle_request(Request request, int client_sock, Server server);
+
 
 #endif

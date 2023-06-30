@@ -51,11 +51,6 @@ server {
 		allow_methods GET
 	}
 
-	location /method {
-		index /errors.html
-		allow_methods POST
-	}
-
 	location /redirection {
 		allow_methods GET POST
 		redirect https://42.fr/
@@ -107,11 +102,6 @@ server {
 	location /errors {
 		index /errors.html
 		allow_methods GET
-	}
-
-	location /method {
-		index /errors.html
-		allow_methods POST
 	}
 
 	location /redirection {

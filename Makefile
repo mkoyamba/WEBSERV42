@@ -6,7 +6,7 @@
 #    By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/06/06 17:04:20 by mkoyamba          #+#    #+#              #
-#    Updated: 2023/06/21 17:19:26 by mkoyamba         ###   ########.fr        #
+#    Updated: 2023/06/29 16:30:41 by mkoyamba         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -33,6 +33,8 @@ SRC +=	Location.cpp\
 #EXEC
 SRC +=	exec.cpp\
 		Request.cpp\
+		setup.cpp\
+		connection.cpp\
 		
 
 #          ----------========== {     OBJS     } ==========----------
