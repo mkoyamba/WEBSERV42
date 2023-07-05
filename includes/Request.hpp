@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/09 17:24:45 by bade-lee          #+#    #+#             */
-/*   Updated: 2023/06/21 13:46:44 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/07/05 14:09:08 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,11 @@
 
 # include "webserv.hpp"
 
+class Config;
+
 class Request {
 	public:
-		Request(std::string Request_message, Server server);
+		Request(std::string Request_message, Server server, Config &config, int fd);
 		~Request() {};
 
 		std::string							getMethod(void) { return _method; };

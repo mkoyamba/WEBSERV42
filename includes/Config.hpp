@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 17:18:49 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/30 12:08:14 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/07/05 14:06:48 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ class Config {
 		void	handle_file(std::string filename);
 		int		check_content(void);
 		void	check_ports(void);
+		void	setClose(int fd, bool state) { _fd_map[fd].close = state; }
 		void	setMap(int fd, FdInfo &info) {
 			_fd_map[fd].events.data = info.events.data;
 			_fd_map[fd].events.fflags = info.events.fflags;

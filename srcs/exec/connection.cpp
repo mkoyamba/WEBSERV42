@@ -6,14 +6,14 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/29 16:13:00 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/30 12:44:17 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/07/05 14:50:35 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/webserv.hpp"
 
-void	finish_request(int fd, int kq) {
-	struct kevent ev;
+void	finish_request(int fd, int kq, Config &config) {
+	struct kevent ev = config.getMap()[fd].events;
 	EV_SET(&ev, fd, EVFILT_WRITE, EV_ADD | EV_ENABLE | EV_ONESHOT, 0, 0, 0);
 	if (kevent(kq, &ev, 1, NULL, 0, NULL) == -1)
 		std::cerr << "Error in kevent" << std::endl;
@@ -66,13 +66,18 @@ void	split_event(int fd, Config &config, int filter, int kq) {
 		else if (std::find(config.getSockets()[i].getClientSockets().begin(), config.getSockets()[i].getClientSockets().end(), fd) != config.getSockets()[i].getClientSockets().end()) {
 			if (filter == EVFILT_READ) {
 				config.getMap()[fd].request = read_request(fd);
-				finish_request(fd, kq);
+				if (!config.getMap()[fd].request.compare("failure"))
+					close_connection(fd, kq, config);
+				else if (!config.getMap()[fd].request.compare(""))
+					return ;
+				finish_request(fd, kq, config);
 			}
 			else if (filter == EVFILT_WRITE) {
-				Request request(config.getMap()[fd].request, *config.getSockets()[i].getServer());
+				Request request(config.getMap()[fd].request, *config.getSockets()[i].getServer(), config, fd);
 				print_request(request);
-				handle_request(request, fd, *config.getSockets()[i].getServer());
-				close_connection(fd, kq, config);
+				handle_request(request, fd, *config.getSockets()[i].getServer(), config);
+				if (config.getMap()[fd].close == true)
+					close_connection(fd, kq, config);
 			}
 		}
 	}

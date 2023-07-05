@@ -6,18 +6,22 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/09 17:27:59 by bade-lee          #+#    #+#             */
-/*   Updated: 2023/06/30 12:45:54 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/07/05 14:34:59 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/Request.hpp"
 
-Request::Request(std::string request_message, Server server) {
+Request::Request(std::string request_message, Server server, Config &config, int fd) {
 	if (!request_message.compare(""))
 		return ;
 	handle_method(request_message);
 	handle_path(request_message, server);
 	handle_body(request_message);
+	if (!_header["Connection"].compare("close\r"))
+		config.setClose(fd, true);
+	else
+		config.setClose(fd, false);
 }
 
 void	Request::handle_method(std::string request_message) {

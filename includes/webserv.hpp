@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/06 17:10:06 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/30 12:22:25 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/07/05 14:17:32 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ void		print_request(Request request);
 void		print_response(Request response, std::string str);
 void		split_event(int fd, Config &config, int filter, int kq);
 std::string	read_request(int client_sock);
-void		handle_request(Request request, int client_sock, Server server);
+void		handle_request(Request request, int client_sock, Server server, Config &config);
 
 
 #endif

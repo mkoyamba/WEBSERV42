@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/08 11:43:05 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/30 12:38:00 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/07/05 14:49:49 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,18 +24,18 @@ std::string	daytime(void) {
 	return time;
 }
 
-void	send_image(char *str, int client_socket, Server server, std::string response) {
+void	send_image(char *str, int client_socket, Server server, std::string response, Config &config) {
 	FILE	*picture;
 	picture = fopen(str, "r");
 	if (!picture) {
-		send_image((char *)"assets/default.png", client_socket, server, response);
+		send_image((char *)"assets/default.png", client_socket, server, response, config);
 		return ;
 	}
 	fseek(picture, 0, SEEK_END);
 	int size = ftell(picture);
 	std::string	size_str = "Content-Length: " + std::to_string(size) + "\r\n\n";
 	std::string	to_print(response + "File: " + std::string(str) + "\n");
-	Request responseC(to_print + size_str, server);
+	Request responseC(to_print + size_str, server, config, -1);
 	print_response(responseC, to_print + size_str);
 	send(client_socket, size_str.c_str(), size_str.size(), 0);
 	fclose(picture);
@@ -49,7 +49,7 @@ void	send_image(char *str, int client_socket, Server server, std::string respons
 	close(fd);
 }
 
-void	send_file(std::string file, int client_socket, Server server, std::string code, std::string type) {
+void	send_file(std::string file, int client_socket, Server server, std::string code, std::string type, Config &config) {
 	std::string response = "HTTP/1.1 " + code + "\r\n";
 	response += "Date: " + daytime() + "\r\n";
 	response += "Server: " + server.getName() + "\r\n";
@@ -58,7 +58,7 @@ void	send_file(std::string file, int client_socket, Server server, std::string c
 	if (!code.compare("202 OK")) {
 		send(client_socket, response.c_str(), response.size(), 0);
 		file = "assets" + file;
-		send_image((char *)file.c_str(), client_socket, server, response);
+		send_image((char *)file.c_str(), client_socket, server, response, config);
 		return ;
 	}
 	else if (file.compare("")) {
@@ -70,7 +70,7 @@ void	send_file(std::string file, int client_socket, Server server, std::string c
 	else
 		content = "<h1>ERROR 404 - Page not found</h1>";
 	response += "Content-Length: " + std::to_string(content.size()) + "\r\n\n";
-	Request responseC("File: " + file + "\n" + response, server);
+	Request responseC("File: " + file + "\n" + response, server, config, -1);
 	print_response(responseC, response);
 	response += content + "\r\n";
 	size_t	size = response.size();
@@ -87,13 +87,13 @@ void	redirect(int client_sock, std::string redirection) {
 	send(client_sock, response.c_str(), response.size(), 0);
 }
 
-void	handle_get(Request request, int client_sock, Server server) {
+void	handle_get(Request request, int client_sock, Server server, Config &config) {
 	if (!request.getPath().compare("NULL") && !request.getMethod().compare("GET")) {
-		send_file(server.getRoot() + server.getErrorPage(404), client_sock, server, "404 Not Found", "text/html");
+		send_file(server.getRoot() + server.getErrorPage(404), client_sock, server, "404 Not Found", "text/html", config);
 		return ;
 	}
 	else if (request.getFile() && !request.getMethod().compare("GET")) {
-		send_file(request.getPath(), client_sock, server, "202 OK", request.getExtension());
+		send_file(request.getPath(), client_sock, server, "202 OK", request.getExtension(), config);
 		return ;
 	}
 	else if (!request.getMethod().compare("GET")) {
@@ -112,23 +112,20 @@ void	handle_get(Request request, int client_sock, Server server) {
 				index += location.getErrorPage(405);
 			else
 				index += server.getErrorPage(405);
-			send_file(index, client_sock, server, "405 Method Not Allowed", "text/html");
+			send_file(index, client_sock, server, "405 Method Not Allowed", "text/html", config);
 			return ;
 		}
 		if (location.getIndex().compare(""))
 			index += location.getIndex();
 		else
 			index += server.getIndex();
-		send_file(index, client_sock, server, "200 OK", "text/html");
+		send_file(index, client_sock, server, "200 OK", "text/html", config);
 	}
 }
 
-void	handle_post(Request request, int client_sock, Server server) {
+void	handle_post(Request request, int client_sock, Server server, Config &config) {
 	std::map<std::string, std::string> header = request.getHeader();
 	std::string raw_body = request.getBody();
-	size_t begin = raw_body.find("filename=") + 10;
-	std::string filename = raw_body.substr(begin, raw_body.find('\"', begin) - begin);
-	std::string delim = request.getHeader()["boundary"];
 	char buff[100];
 	bzero(buff, 100);
 	std::string buffer;
@@ -141,6 +138,9 @@ void	handle_post(Request request, int client_sock, Server server) {
 	}
 	raw_body += buffer;
 	std::string body;
+	size_t begin = raw_body.find("filename=") + 10;
+	std::string filename = raw_body.substr(begin, raw_body.find('\"', begin) - begin);
+	std::string delim = request.getHeader()["boundary"];
 	begin = raw_body.find("\r\n\r\n") + 4;
 	begin = raw_body.find("\r\n\r\n", begin) + 4;
 	body = raw_body.substr(begin, raw_body.find(delim, begin) - begin - 4);
@@ -155,19 +155,25 @@ void	handle_post(Request request, int client_sock, Server server) {
 		index += location.getErrorPage(413);
 		if (!index.compare(root))
 			index += server.getErrorPage(413);
-		if (!index.compare(root))
-			send_file("www/homepage.html", client_sock, server, "413 Content Too Large", "text/html");
 		else
-			send_file(index, client_sock, server, "413 Content Too Large", "text/html");
+			send_file(index, client_sock, server, "413 Content Too Large", "text/html", config);
 		return ;
 	}
 	std::ofstream file("upload/" + filename);
 	file << body;
 	file.close();
-	send_file("www/upload.html", client_sock, server, "200 OK", "text/html");
+	Location	location = server.getLocations()[request.getPath()];
+	std::string	index;
+	std::string	root = location.getRoot();
+	if (!root.compare(""))
+		root = server.getRoot();
+	root += "/";
+	index += root;
+	index += "upload.html";
+	send_file(index, client_sock, server, "200 OK", "text/html", config);
 }
 
-void	handle_delete(Request request, int client_sock, Server server) {
+void	handle_delete(Request request, int client_sock, Server server, Config &config) {
 	std::string path;
 	char	*arg[4];
 	int 	pip[2];
@@ -210,18 +216,18 @@ void	handle_delete(Request request, int client_sock, Server server) {
 		std::string response_str;
 		for (size_t i = 0; i < strlen(buff); i++)
 			response_str.push_back(buff[i]);
-		Request	response(response_str, server);
+		Request	response(response_str, server, config, -1);
 		print_response(response, response_str);
 	}
 }
 
-void	handle_request(Request request, int client_sock, Server server) {
+void	handle_request(Request request, int client_sock, Server server, Config &config) {
 	if (!request.getMethod().compare("GET"))
-		handle_get(request, client_sock, server);
+		handle_get(request, client_sock, server, config);
 	else if (!request.getMethod().compare("POST"))
-		handle_post(request, client_sock, server);
+		handle_post(request, client_sock, server, config);
 	else if (!request.getMethod().compare("DELETE"))
-		handle_delete(request, client_sock, server);
+		handle_delete(request, client_sock, server, config);
 }
 
 std::string	read_request(int client_sock) {
@@ -229,6 +235,10 @@ std::string	read_request(int client_sock) {
 	char buffer[101];
 	bzero(buffer, 101);
 	int j = read(client_sock, buffer, 100);
+	if (j == -1)
+		return "failure";
+	if (j == 0)
+		return "";
 	while (j > 0) {
 		for (int i = 0; i < j; i++)
 			request_str.push_back(buffer[i]);
