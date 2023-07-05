@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/08 11:43:05 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/07/05 14:49:49 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/07/05 19:18:25 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -235,9 +235,7 @@ std::string	read_request(int client_sock) {
 	char buffer[101];
 	bzero(buffer, 101);
 	int j = read(client_sock, buffer, 100);
-	if (j == -1)
-		return "failure";
-	if (j == 0)
+	if (j == -1 || j == 0)
 		return "";
 	while (j > 0) {
 		for (int i = 0; i < j; i++)

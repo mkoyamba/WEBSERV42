@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/29 16:13:00 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/07/05 14:50:35 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/07/05 19:19:29 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,8 +66,10 @@ void	split_event(int fd, Config &config, int filter, int kq) {
 		else if (std::find(config.getSockets()[i].getClientSockets().begin(), config.getSockets()[i].getClientSockets().end(), fd) != config.getSockets()[i].getClientSockets().end()) {
 			if (filter == EVFILT_READ) {
 				config.getMap()[fd].request = read_request(fd);
-				if (!config.getMap()[fd].request.compare("failure"))
+				if (!config.getMap()[fd].request.compare("")) {
 					close_connection(fd, kq, config);
+					return ;
+				}
 				else if (!config.getMap()[fd].request.compare(""))
 					return ;
 				finish_request(fd, kq, config);

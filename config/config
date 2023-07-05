@@ -36,6 +36,11 @@ server {
 		allow_methods GET POST
 	}
 
+	location /method {
+		index /homepage.html
+		allow_methods POST
+	}
+
 	location /delete {
 		index /delete.html
 		allow_methods GET DELETE
@@ -87,6 +92,11 @@ server {
 	location /upload {
 		index /upload.html
 		allow_methods GET POST
+	}
+
+	location /method {
+		index /homepage.html
+		allow_methods POST
 	}
 
 	location /delete {
