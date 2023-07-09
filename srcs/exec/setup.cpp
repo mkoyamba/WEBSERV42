@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/29 16:04:01 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/06/30 11:54:55 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/07/09 16:21:32 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ int	server_socket(std::pair<std::string, int> listen_pair, sockaddr_in &sockaddr
 		close(sockfd);
 		return -1;
 	}
-	if (listen(sockfd, 1) < 0) {
+	if (listen(sockfd, 10) < 0) {
 		std::cerr << RED << "\n\nFailed to listen on socket." << std::endl;
 		close(sockfd);
 		return -1;

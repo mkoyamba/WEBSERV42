@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/08 11:43:05 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/07/05 19:18:25 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/07/06 14:50:27 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,9 +126,9 @@ void	handle_get(Request request, int client_sock, Server server, Config &config)
 void	handle_post(Request request, int client_sock, Server server, Config &config) {
 	std::map<std::string, std::string> header = request.getHeader();
 	std::string raw_body = request.getBody();
+	std::string buffer;
 	char buff[100];
 	bzero(buff, 100);
-	std::string buffer;
 	int chars = read(client_sock, buff, 99);
 	while (chars > 0) {
 		for (int i = 0; i < chars; i++)
