@@ -6,7 +6,7 @@
 /*   By: mkoyamba <mkoyamba@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/08 11:43:05 by mkoyamba          #+#    #+#             */
-/*   Updated: 2023/07/06 14:50:27 by mkoyamba         ###   ########.fr       */
+/*   Updated: 2023/07/09 16:37:30 by mkoyamba         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ void	send_image(char *str, int client_socket, Server server, std::string respons
 	FILE	*picture;
 	picture = fopen(str, "r");
 	if (!picture) {
-		send_image((char *)"assets/default.png", client_socket, server, response, config);
+		send_image((char *)"assets/cat.png", client_socket, server, response, config);
 		return ;
 	}
 	fseek(picture, 0, SEEK_END);
